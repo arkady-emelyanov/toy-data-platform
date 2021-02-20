@@ -1,10 +1,11 @@
 package lib
 
 import (
-	"github.com/Shopify/sarama"
 	"io"
 	"log"
 	"time"
+
+	"github.com/Shopify/sarama"
 )
 
 type RequestWriter struct {
