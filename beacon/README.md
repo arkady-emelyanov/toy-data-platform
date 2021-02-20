@@ -8,7 +8,6 @@ Start Kafka broker and wait it initialized:
 
 Create Kafka topic with 3 partitions and run beacon:
 ```
-> kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --create --topic v1.raw --partitions 3 --replication-factor 1
 > go run ./main.go -bootstrap-server 127.0.0.1:9092 -stdout=false
 ```
 
