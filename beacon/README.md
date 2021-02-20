@@ -3,10 +3,11 @@
 Start Kafka broker and wait it initialized:
 ```
 > docker-compose up -d
-> kafka-broker-api-versions.sh --bootstrap-server 127.0.0.1:9092
+> kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --list
+v1.raw
 ```
 
-Create Kafka topic with 3 partitions and run beacon:
+Run beacon:
 ```
 > go run ./main.go -bootstrap-server 127.0.0.1:9092 -stdout=false
 ```
