@@ -428,6 +428,13 @@
             <version>3.8.1</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.core5/httpcore5 -->
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5</artifactId>
+            <version>5.0.3</version>
+        </dependency>
+
         <!-- Add slf4j API frontend binding with JUL backend -->
         <dependency>
             <groupId>org.slf4j</groupId>
