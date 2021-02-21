@@ -41,6 +41,9 @@ public class ParseHitFn extends DoFn<byte[], List<String>> {
             out.get(parsedTag).output(respond);
 
         } catch (NullPointerException | IOException | HttpException e) {
+            // That should not be the case when Beacon is behind the ALB/NGINX Load Balancer.
+            // Load balancer will pre-validate request, so, is safe to parse request here.
+            // The only reason of failure, one of the required headers is missing.
             out.get(brokenTag).output(in);
         }
     }
