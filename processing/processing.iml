@@ -154,17 +154,17 @@
     <orderEntry type="library" name="Maven: org.hamcrest:hamcrest:2.1" level="project" />
     <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-library:2.1" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.13-beta-3" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.beam:beam-runners-direct-java:2.27.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-direct-java:2.27.0" level="project" />
     <orderEntry type="library" name="Maven: args4j:args4j:2.33" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-core:3.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy:1.9.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy-agent:1.9.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.objenesis:objenesis:2.6" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.beam:beam-runners-portability-java:2.27.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-portability-java:2.27.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-java-fn-execution:2.27.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-fn-execution:2.27.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.beam:beam-vendor-sdks-java-extensions-protobuf:2.27.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.beam:beam-runners-java-job-service:2.27.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.beam:beam-sdks-java-harness:2.27.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-java-job-service:2.27.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-harness:2.27.0" level="project" />
   </component>
 </module>

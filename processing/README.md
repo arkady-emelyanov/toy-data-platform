@@ -19,6 +19,16 @@ Run transform pipeline
 
 ## Beam
 
+DirectRunner
+```
+mvn clean package -Pdirect-runner -DskipTests
+mvn exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
+    -Pdirect-runner \
+    -Dexec.args="--runner=DirectRunner \
+      --inputFile=../beacon/README.md \
+      --output=target/counts"
+```
+
 Flink
 ```
 mvn clean package -Pflink-runner -DskipTests
