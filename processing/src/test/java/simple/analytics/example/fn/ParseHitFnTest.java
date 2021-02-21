@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+
 @RunWith(JUnit4.class)
 public class ParseHitFnTest implements Serializable {
 
@@ -30,37 +31,37 @@ public class ParseHitFnTest implements Serializable {
 
     @Test
     public void parseSingleHitFn() {
-        List<String> allOfThem = new ArrayList<>();
-        allOfThem.add(
+        List<String> requestRawList = new ArrayList<>();
+        requestRawList.add(
                 "GET /hello-world.png HTTP/1.0\n" +
                         "Referer: example.com\n" +
                         "X-Forwarded-For: 1.1.1.1\n" +
                         "User-Agent: curl\n" +
                         "\n\n"
         );
-        allOfThem.add(
+        requestRawList.add(
                 "GET / HTTP/1.0\n" +
                         "Broken-Record"
         );
 
-        List<byte[]> srcListBytes = new ArrayList<>();
-        for (String srcString : allOfThem) {
-            srcListBytes.add(srcString.getBytes(StandardCharsets.UTF_8));
+        List<byte[]> requestRawBytesList = new ArrayList<>();
+        for (String srcString : requestRawList) {
+            requestRawBytesList.add(srcString.getBytes(StandardCharsets.UTF_8));
         }
 
         // Two receivers: one for parsed responses, one for broken
-        final TupleTag<List<String>> parsedTag = new TupleTag<>() {};
-        final TupleTag<byte[]> brokenTag = new TupleTag<>() {};
+        TupleTag<List<String>> parsedTag = new TupleTag<>() {};
+        TupleTag<byte[]> brokenTag = new TupleTag<>() {};
 
         // Parse raw source request header into tuple
         PCollectionTuple received = pipeline
-                .apply(Create.of(srcListBytes))
+                .apply(Create.of(requestRawBytesList))
                 .apply(ParDo.of(new ParseHitFn(parsedTag, brokenTag))
                         .withOutputTags(parsedTag, TupleTagList.of(brokenTag))
                 );
 
 
-        // TODO: describe why
+        // Here is our expectation of parsed item
         List<String> dstTuple = Arrays.asList(
                 "/hello-world.png",
                 "1.1.1.1",
@@ -69,7 +70,9 @@ public class ParseHitFnTest implements Serializable {
         );
         List<List<String>> dstColl = Collections.singletonList(dstTuple);
         PAssert.that(received.get(parsedTag)).containsInAnyOrder(dstColl);
-        PAssert.that(received.get(brokenTag)).containsInAnyOrder(srcListBytes.get(1));
+
+        // Here is our expectation about parse failure
+        PAssert.that(received.get(brokenTag)).containsInAnyOrder(requestRawBytesList.get(1));
 
         // Run and observe results..
         pipeline.run().waitUntilFinish();

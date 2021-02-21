@@ -14,6 +14,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * The raw request parser fn.
+ * Parse request into tuple: (uri, remote_address, referer, user-agent)
+ */
 public class ParseHitFn extends DoFn<byte[], List<String>> {
 
     private final TupleTag<List<String>> parsedTag;
@@ -40,10 +44,9 @@ public class ParseHitFn extends DoFn<byte[], List<String>> {
             );
             out.get(parsedTag).output(respond);
 
-        } catch (NullPointerException | IOException | HttpException e) {
+        } catch (IOException | HttpException e) {
             // That should not be the case when Beacon is behind the ALB/NGINX Load Balancer.
-            // Load balancer will pre-validate request, so, is safe to parse request here.
-            // The only reason of failure, one of the required headers is missing.
+            // Still, exception could happen if one of the required headers is missing.
             out.get(brokenTag).output(in);
         }
     }
