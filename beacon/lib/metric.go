@@ -2,6 +2,7 @@ package lib
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -9,6 +10,7 @@ import (
 
 type MetricServer struct {
 	hitsCounter prometheus.Counter
+	reqDuration prometheus.Histogram
 }
 
 func CreateMetricServer() *MetricServer {
@@ -17,9 +19,17 @@ func CreateMetricServer() *MetricServer {
 		Help: "number of requests received",
 	})
 
+	reqDuration := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name: "beacon_hit_duration_seconds",
+		Help: "time of request processing",
+		Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 0.8},
+	})
+
 	prometheus.MustRegister(hitsCounter)
+	prometheus.MustRegister(reqDuration)
 	return &MetricServer{
 		hitsCounter: hitsCounter,
+		reqDuration: reqDuration,
 	}
 }
 
@@ -32,8 +42,9 @@ func (m *MetricServer) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, nil)
 }
 
-func (m *MetricServer) Hit() {
+func (m *MetricServer) Hit(took time.Duration) {
 	m.hitsCounter.Inc()
+	m.reqDuration.Observe(took.Seconds())
 }
 
 func (m *MetricServer) Shutdown() error {

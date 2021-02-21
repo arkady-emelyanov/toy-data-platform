@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/arkady-emelyanov/simple-analytics-example/beacon/lib"
 	"github.com/valyala/fasthttp"
@@ -42,6 +43,7 @@ func main() {
 
 	// attach handler to http server
 	s.Handler = func(ctx *fasthttp.RequestCtx) {
+		start := ctx.ConnTime()
 		if _, err := ctx.Request.WriteTo(w); err != nil {
 			log.Printf("Write error: %s\n", err)
 		}
@@ -50,7 +52,9 @@ func main() {
 		ctx.Response.Header.Add("Cache-Control", "no-cache, no-store, must-revalidate")
 		ctx.Response.Header.Add("Content-Type", "image/gif")
 		ctx.Response.SetBody(gTransparentPixel)
-		m.Hit()
+
+		// Register a request and time required for serving request
+		m.Hit(time.Since(start))
 	}
 
 	// start servers
