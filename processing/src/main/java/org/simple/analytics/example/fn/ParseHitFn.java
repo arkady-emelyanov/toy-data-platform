@@ -2,6 +2,7 @@ package org.simple.analytics.example.fn;
 
 import org.apache.beam.sdk.transforms.DoFn;
 
+import org.apache.beam.sdk.values.TupleTag;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.impl.io.DefaultHttpRequestParser;
@@ -15,24 +16,32 @@ import java.util.List;
 
 public class ParseHitFn extends DoFn<byte[], List<String>> {
 
+    private final TupleTag<List<String>> parsedTag;
+    private final TupleTag<byte[]> brokenTag;
+
+    public ParseHitFn(TupleTag<List<String>> parsedTag, TupleTag<byte[]> brokenTag) {
+        this.parsedTag = parsedTag;
+        this.brokenTag = brokenTag;
+    }
+
     @ProcessElement
-    public void processElement(@Element byte[] in, OutputReceiver<List<String>> out) {
+    public void processElement(@Element byte[] in, MultiOutputReceiver out) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(in);
         SessionInputBuffer inputBuffer = new SessionInputBufferImpl(4096);
         DefaultHttpRequestParser parser = new DefaultHttpRequestParser();
 
         try {
-            ClassicHttpRequest parsed = parser.parse(inputBuffer, inputStream);
+            ClassicHttpRequest req = parser.parse(inputBuffer, inputStream);
             List<String> respond = Arrays.asList(
-                    parsed.getRequestUri(),
-                    parsed.getHeader("x-forwarded-for").getValue(),
-                    parsed.getHeader("referer").getValue(),
-                    parsed.getHeader("user-agent").getValue()
+                    req.getRequestUri(),
+                    req.getHeader("x-forwarded-for").getValue(),
+                    req.getHeader("referer").getValue(),
+                    req.getHeader("user-agent").getValue()
             );
-            out.output(respond);
+            out.get(parsedTag).output(respond);
 
         } catch (NullPointerException | IOException | HttpException e) {
-            // TODO: log exception here..
+            out.get(brokenTag).output(in);
         }
     }
 }
