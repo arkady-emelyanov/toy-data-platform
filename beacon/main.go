@@ -24,6 +24,10 @@ var (
 	}
 )
 
+type shutdownable interface {
+	Shutdown() error
+}
+
 func main() {
 	// parse command-line arguments
 	flagBroker := flag.String("bootstrap-server", "", "Kafka bootstrap server: 127.0.0.1:9092")
@@ -33,7 +37,7 @@ func main() {
 	flagMetric := flag.String("metric-listen", "127.0.0.1:9100", "Metrics listen address")
 	flag.Parse()
 
-	// create metrics server
+	// create services...
 	m := lib.CreateMetricServer()
 	s := lib.CreateHttpServer()
 	w, err := lib.CreateWriter(*flagBroker, *flagTopic, *flagStdout)
@@ -69,25 +73,20 @@ func main() {
 		}
 	}()
 
-	// setup signal handler
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
-
-	// wait for signal
+	// Display console info
 	log.Println("HTTP server address:", *flagListen)
 	log.Println("Metrics server address:", *flagMetric)
-	<-done
-	log.Println("Shutdown signal received, exiting...")
 
-	// gracefully shutdown things..
-	if err := s.Shutdown(); err != nil {
-		log.Fatalf("HTTP Server shutdown error: %s\n", err)
-	}
-	if err := w.Shutdown(); err != nil {
-		log.Fatalf("Writer shutdown error: %s\n", err)
-	}
-	if err := m.Shutdown(); err != nil {
-		log.Fatalf("Prometheus shutdown error: %s\n", err)
+	// Setup signal handler and wait for signal
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
+	<-done
+
+	log.Println("Shutdown signal received, exiting...")
+	for _, srv := range []shutdownable{s, w, m} {
+		if err := srv.Shutdown(); err != nil {
+			log.Fatalf("shutdown error: %s\n", err)
+		}
 	}
 
 	// ok, we done
