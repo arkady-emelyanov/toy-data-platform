@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -36,7 +36,10 @@
     <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-expansion-service:2.27.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.beam:beam-model-fn-execution:2.27.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-core-construction-java:2.27.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-fn-execution:2.27.0" level="project" />
     <orderEntry type="library" name="Maven: io.github.classgraph:classgraph:4.8.65" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-java-fn-execution:2.27.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-vendor-sdks-java-extensions-protobuf:2.27.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-extensions-google-cloud-platform-core:2.27.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.cloud.bigdataoss:gcsio:2.1.6" level="project" />
     <orderEntry type="library" name="Maven: com.github.rholder:guava-retrying:2.0.0" level="project" />
@@ -160,11 +163,5 @@
     <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy:1.9.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy-agent:1.9.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.objenesis:objenesis:2.6" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-portability-java:2.27.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-java-fn-execution:2.27.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-fn-execution:2.27.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-vendor-sdks-java-extensions-protobuf:2.27.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-java-job-service:2.27.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-harness:2.27.0" level="project" />
   </component>
 </module>
