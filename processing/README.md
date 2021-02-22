@@ -1,20 +1,9 @@
 # Processing
 
-Start Kafka broker and wait it initialized:
-```
-> docker-compose up -d
-> kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --list
-v1.raw
-v1.impressions
-v1.sources
-v1.user-agents
-v1.dlq
-```
-
 Load test data:
 ```
-mvn clean package -Pdirect-runner -DskipTests
-mvn exec:java -Dexec.mainClass=org.simple.analytics.example.DataGen
+mvn compile exec:java \
+    -Dexec.mainClass=org.simple.analytics.example.DataGen
 ```
 
 Run transform pipeline
@@ -25,8 +14,7 @@ Run transform pipeline
 
 DirectRunner
 ```
-mvn clean package -Pdirect-runner -DskipTests
-mvn exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
+mvn compile exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
     -Pdirect-runner \
     -Dexec.args="--runner=DirectRunner \
       --inputFile=../beacon/README.md \
@@ -35,8 +23,7 @@ mvn exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
 
 Flink
 ```
-mvn clean package -Pflink-runner -DskipTests
-mvn exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
+mvn compile exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
     -Pflink-runner \
     -Dexec.args="--runner=FlinkRunner \
       --inputFile=../beacon/README.md \
@@ -48,8 +35,7 @@ mvn exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
 
 Spark
 ```
-mvn clean package -Pspark-runner -DskipTests
-mvn exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
+mvn compile exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
     -Pspark-runner \
     -Dexec.args="--runner=SparkRunner \
       --inputFile=../beacon/README.md \

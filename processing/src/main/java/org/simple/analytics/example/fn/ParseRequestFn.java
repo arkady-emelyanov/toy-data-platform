@@ -54,9 +54,7 @@ public class ParseRequestFn extends DoFn<byte[], List<String>> {
             ClassicHttpRequest req = parser.parse(inputBuffer, inputStream);
             List<String> respond = Arrays.asList(
                     req.getRequestUri(),
-                    getHeaderValue(req, "host"),
                     getHeaderValue(req, "x-forwarded-for"),
-                    getHeaderValue(req, "referer"),
                     getHeaderValue(req, "user-agent")
             );
             out.get(parsedTag).output(respond);

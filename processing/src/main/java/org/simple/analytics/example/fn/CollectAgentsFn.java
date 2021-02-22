@@ -21,7 +21,7 @@ public class CollectAgentsFn extends DoFn<List<String>, List<String>> {
 
     @ProcessElement
     public void processElement(@Element List<String> src, OutputReceiver<List<String>> dst) {
-        String userAgent = src.get(4);
+        String userAgent = src.get(2);
         UserAgent ua = userAgentAnalyzer.parse(userAgent);
         List<String> out = Arrays.asList(
                 ua.getValue("DeviceClass"),
