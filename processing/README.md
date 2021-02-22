@@ -4,9 +4,11 @@ Start Kafka broker and wait it initialized:
 ```
 > docker-compose up -d
 > kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --list
-v1.dlq
-v1.hit
 v1.raw
+v1.impressions
+v1.sources
+v1.user-agents
+v1.dlq
 ```
 
 Load test data:
@@ -19,7 +21,7 @@ Run transform pipeline
 ```
 ```
 
-## Beam
+## Beam (fix it)
 
 DirectRunner
 ```

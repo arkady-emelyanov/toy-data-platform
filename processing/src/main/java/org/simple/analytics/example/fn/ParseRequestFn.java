@@ -19,12 +19,12 @@ import java.util.List;
 /**
  * The raw request parser.
  */
-public class ParseRawRequestFn extends DoFn<byte[], List<String>> {
+public class ParseRequestFn extends DoFn<byte[], List<String>> {
 
     private final TupleTag<List<String>> parsedTag;
     private final TupleTag<byte[]> brokenTag;
 
-    public ParseRawRequestFn(TupleTag<List<String>> parsedTag, TupleTag<byte[]> brokenTag) {
+    public ParseRequestFn(TupleTag<List<String>> parsedTag, TupleTag<byte[]> brokenTag) {
         this.parsedTag = parsedTag;
         this.brokenTag = brokenTag;
     }
