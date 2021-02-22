@@ -22,25 +22,11 @@ services:
       KAFKA_ADVERTISED_LISTENERS: EXT://127.0.0.1:9092,INT://:9093
       KAFKA_INTER_BROKER_LISTENER_NAME: INT
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
-      KAFKA_CREATE_TOPICS: "v1.raw:3:1,v1.impressions:3:1,v1.user-agents:3:1"
+      KAFKA_CREATE_TOPICS: "v1.raw:3:1,v1.impressions:3:1,v1.user-agents:3:1,v1.dlq:3:1"
     volumes:
       - kafka:/kafka
     depends_on:
       - zookeeper
-
-  schema-registry:
-    image: confluentinc/cp-schema-registry:6.0.1
-    restart: unless-stopped
-    ports:
-      - "8085:8085"
-    environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka:9093"
-      SCHEMA_REGISTRY_HOST_NAME: "127.0.0.1"
-      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8085"
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
-    depends_on:
-      - zookeeper
-      - kafka
 
 volumes:
   zkdata:

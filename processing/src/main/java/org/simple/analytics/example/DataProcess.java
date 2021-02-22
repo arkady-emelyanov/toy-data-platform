@@ -1,8 +1,12 @@
 package org.simple.analytics.example;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import org.apache.beam.sdk.transforms.ToJson;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
@@ -14,9 +18,7 @@ import org.apache.beam.sdk.values.PCollectionTuple;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.PCollection;
 
-import org.simple.analytics.example.fn.CollectAgentsFn;
-import org.simple.analytics.example.fn.NormalizeUriFn;
-import org.simple.analytics.example.fn.ParseRequestFn;
+import org.simple.analytics.example.fn.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,9 +44,9 @@ public class DataProcess {
 
     // Kafka topics
     private static final String sourceTopic = "v1.raw";
-    private static final String dlqTopic = "v1.dlq";
-    private static final String userAgentTopic = "v1.user-agents";
     private static final String impressionTopic = "v1.impressions";
+    private static final String userAgentTopic = "v1.user-agents";
+    private static final String dlqTopic = "v1.dlq";
 
     /**
      * Pipeline processor
@@ -57,20 +59,22 @@ public class DataProcess {
         PipelineOptions options = PipelineOptionsFactory.create();
         Pipeline p = Pipeline.create(options);
 
-        Map<String, Object> consumerConfigs = new HashMap<>();
-        consumerConfigs.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        consumerConfigs.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsets);
+        Map<String, Object> consumerProps = new HashMap<>();
+        consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServer);
+        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsets);
+
+        Map<String, Object> producerProps = new HashMap<>();
+        producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServer);
+        producerProps.put(ProducerConfig.ACKS_CONFIG, "all");
 
         // Create source PCollection from Kafka topic
         // Read byte[] values from source topic.
         PCollection<byte[]> sourceStream = p.apply(KafkaIO.<byte[], byte[]>read()
-                .withMaxNumRecords(5) // TODO: remove once done
-                .withConsumerConfigUpdates(consumerConfigs)
-                .withBootstrapServers(boostrapServer)
+                .withConsumerConfigUpdates(consumerProps)
                 .withTopic(sourceTopic)
                 .withKeyDeserializer(ByteArrayDeserializer.class)
                 .withValueDeserializer(ByteArrayDeserializer.class)
-                .withLogAppendTime()
                 .withReadCommitted()
                 .withoutMetadata()) // PCollection<KafkaRecord<..>> -> PCollection<byte[], byte[]>
                 .apply(Values.create()); // PCollection<byte[], byte[]> -> PCollection<byte[]>
@@ -89,7 +93,7 @@ public class DataProcess {
         parseResults
                 .get(brokenTag)
                 .apply(KafkaIO.<Void, byte[]>write()
-                        .withBootstrapServers(boostrapServer)
+                        .withProducerConfigUpdates(producerProps)
                         .withTopic(dlqTopic)
                         .withValueSerializer(ByteArraySerializer.class)
                         .values()
@@ -98,19 +102,30 @@ public class DataProcess {
         // Analyze User-agent from parsed results.
         // Once done, write final parsed user-agent
         // into separate topic.
-        // TODO: serialize
         parseResults
                 .get(parsedTag)
-                .apply(ParDo.of(new CollectAgentsFn()));
+                .apply(ParDo.of(new CollectAgentsFn()))
+                .apply(ParDo.of(new MapUserAgent()))
+                .apply(ToJson.of())
+                .apply(KafkaIO.<Void, String>write()
+                        .withProducerConfigUpdates(producerProps)
+                        .withTopic(userAgentTopic)
+                        .withValueSerializer(StringSerializer.class)
+                        .values());
 
         // Cleanup the request uri from parsed results.
         // Once done, write final parsed impression
         // into separate topic.
-        // TODO: serialize
         parseResults
                 .get(parsedTag)
-                .apply(ParDo.of(new NormalizeUriFn()));
-
+                .apply(ParDo.of(new NormalizeUriFn()))
+                .apply(ParDo.of(new MapImpression()))
+                .apply(ToJson.of())
+                .apply(KafkaIO.<Void, String>write()
+                        .withProducerConfigUpdates(producerProps)
+                        .withTopic(impressionTopic)
+                        .withValueSerializer(StringSerializer.class)
+                        .values());
 
         // Start the pipeline.
         p.run().waitUntilFinish();
