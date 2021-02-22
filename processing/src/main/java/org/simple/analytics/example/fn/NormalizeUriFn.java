@@ -14,6 +14,7 @@ public class NormalizeUriFn extends DoFn<List<String>, List<String>> {
 
     @ProcessElement
     public void processElement(@Element List<String> src, OutputReceiver<List<String>> dst) {
+        // transform: /some-url.jpg -> some-url
         String s0 = src.get(0);
         String s1 = StringUtils.stripStart(s0, "/");
         String s2 = FilenameUtils.removeExtension(s1);

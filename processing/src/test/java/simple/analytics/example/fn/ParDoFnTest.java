@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import org.simple.analytics.example.fn.CollectAgentsFn;
 import org.simple.analytics.example.fn.NormalizeHostFn;
 import org.simple.analytics.example.fn.NormalizeUriFn;
 import org.simple.analytics.example.fn.ParseRequestFn;
@@ -21,6 +22,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(JUnit4.class)
@@ -28,6 +30,30 @@ public class ParDoFnTest implements Serializable {
 
     @Rule
     public final transient TestPipeline pipeline = TestPipeline.create();
+
+    @Test
+    public void collectAgentsFnTest() {
+        List<List<String>> source = Collections.singletonList(
+                Arrays.asList(
+                        "-",
+                        "-",
+                        "-",
+                        "-",
+                        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36"
+                )
+        );
+
+        PCollection<List<String>> received = pipeline
+                .apply(Create.of(source))
+                .apply(ParDo.of(new CollectAgentsFn()));
+
+        List<List<String>> expected = Collections.singletonList(
+                Arrays.asList("Desktop", "Apple Macintosh", "Mac OS X")
+        );
+
+        PAssert.that(received).containsInAnyOrder(expected);
+        pipeline.run().waitUntilFinish();
+    }
 
     @Test
     public void normalizeDomainFnTest() {

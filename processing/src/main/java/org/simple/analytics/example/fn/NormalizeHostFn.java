@@ -13,10 +13,9 @@ public class NormalizeHostFn extends DoFn<List<String>, List<String>> {
     @ProcessElement
     public void processElement(@Element List<String> src, OutputReceiver<List<String>> dst) {
         List<String> out = new ArrayList<>();
-        out.add(src.get(0));
 
-        // 127.0.0.1:8080 -> 127.0.0.1
-        // example.com:443 -> example.com
+        // transform: 127.0.0.1:8080 -> 127.0.0.1
+        out.add(src.get(0));
         String s0 = src.get(1);
         int portIndex = s0.indexOf(":");
         if (portIndex > 1) {
