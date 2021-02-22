@@ -1,23 +1,22 @@
 package org.simple.analytics.example;
 
-import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.values.PCollectionTuple;
-import org.apache.beam.sdk.values.TupleTag;
-import org.apache.beam.sdk.values.TupleTagList;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
-
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.values.TupleTagList;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.Values;
+import org.apache.beam.sdk.values.PCollectionTuple;
+import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.PCollection;
-import org.apache.kafka.common.serialization.ByteArraySerializer;
+
 import org.simple.analytics.example.fn.CollectAgentsFn;
 import org.simple.analytics.example.fn.NormalizeUriFn;
 import org.simple.analytics.example.fn.ParseRequestFn;
-
 
 import java.util.HashMap;
 import java.util.List;
