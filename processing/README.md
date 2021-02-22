@@ -11,6 +11,8 @@ v1.raw
 
 Load test data:
 ```
+mvn clean package -Pdirect-runner -DskipTests
+mvn exec:java -Dexec.mainClass=org.simple.analytics.example.DataGen
 ```
 
 Run transform pipeline

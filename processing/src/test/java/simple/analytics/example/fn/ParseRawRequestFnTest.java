@@ -12,25 +12,32 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import org.simple.analytics.example.fn.ParseHitFn;
+import org.simple.analytics.example.fn.ParseRawRequestFn;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 
 @RunWith(JUnit4.class)
-public class ParseHitFnTest implements Serializable {
+public class ParseRawRequestFnTest implements Serializable {
 
     @Rule
     public final transient TestPipeline pipeline = TestPipeline.create();
 
     @Test
-    public void parseSingleHitFn() {
+    public void parseRawRequestFn() {
         List<String> requestRawList = new ArrayList<>();
+        requestRawList.add(
+                "GET /hello-world.png HTTP/1.0\n" +
+                        "Host: 127.0.0.1:8080\n" +
+                        "Referer: example.com\n" +
+                        "X-Forwarded-For: 1.1.1.1\n" +
+                        "User-Agent: curl\n" +
+                        "\n\n"
+        );
         requestRawList.add(
                 "GET /hello-world.png HTTP/1.0\n" +
                         "Referer: example.com\n" +
@@ -49,29 +56,29 @@ public class ParseHitFnTest implements Serializable {
         }
 
         // Two receivers: one for parsed responses, one for broken
-        TupleTag<List<String>> parsedTag = new TupleTag<>() {};
-        TupleTag<byte[]> brokenTag = new TupleTag<>() {};
+        TupleTag<List<String>> parsedTag = new TupleTag<>() {
+        };
+        TupleTag<byte[]> brokenTag = new TupleTag<>() {
+        };
 
-        // Parse raw source request header into tuple
+        // Pipeline
         PCollectionTuple received = pipeline
                 .apply(Create.of(requestRawBytesList))
-                .apply(ParDo.of(new ParseHitFn(parsedTag, brokenTag))
+                .apply(ParDo.of(new ParseRawRequestFn(parsedTag, brokenTag))
                         .withOutputTags(parsedTag, TupleTagList.of(brokenTag))
                 );
 
 
-        // Here is our expectation of parsed item
-        List<String> dstTuple = Arrays.asList(
-                "/hello-world.png",
-                "1.1.1.1",
-                "example.com",
-                "curl"
+        // Here is our list of expectations:
+        List<List<String>> dstRowClean = Arrays.asList(
+                Arrays.asList("/hello-world.png", "127.0.0.1:8080", "1.1.1.1", "example.com", "curl"),
+                Arrays.asList("/hello-world.png", "-", "1.1.1.1", "example.com", "curl")
         );
-        List<List<String>> dstColl = Collections.singletonList(dstTuple);
-        PAssert.that(received.get(parsedTag)).containsInAnyOrder(dstColl);
+        PAssert.that(received.get(parsedTag)).containsInAnyOrder(dstRowClean);
 
-        // Here is our expectation about parse failure
-        PAssert.that(received.get(brokenTag)).containsInAnyOrder(requestRawBytesList.get(1));
+        // Here is our parse failure expectation
+        byte[] dstRowBroken = requestRawBytesList.get(2);
+        PAssert.that(received.get(brokenTag)).containsInAnyOrder(dstRowBroken);
 
         // Run and observe results..
         pipeline.run().waitUntilFinish();
