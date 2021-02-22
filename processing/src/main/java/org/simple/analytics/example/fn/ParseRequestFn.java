@@ -2,6 +2,8 @@ package org.simple.analytics.example.fn;
 
 import org.apache.beam.sdk.transforms.DoFn;
 
+import org.apache.beam.sdk.schemas.Schema;
+import org.apache.beam.sdk.values.Row;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.Header;
@@ -45,8 +47,8 @@ public class ParseRequestFn extends DoFn<byte[], List<String>> {
     }
 
     @ProcessElement
-    public void processElement(@Element byte[] in, MultiOutputReceiver out) {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(in);
+    public void processElement(@Element byte[] src, MultiOutputReceiver dst) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(src);
         SessionInputBuffer inputBuffer = new SessionInputBufferImpl(4096);
         DefaultHttpRequestParser parser = new DefaultHttpRequestParser();
 
@@ -57,12 +59,12 @@ public class ParseRequestFn extends DoFn<byte[], List<String>> {
                     getHeaderValue(req, "x-forwarded-for"),
                     getHeaderValue(req, "user-agent")
             );
-            out.get(parsedTag).output(respond);
+            dst.get(parsedTag).output(respond);
 
         } catch (IOException | HttpException e) {
             // That should not be the case when Beacon is behind the ALB/NGINX Load Balancer.
             // Still, exception could happen if one of the required headers is missing.
-            out.get(brokenTag).output(in);
+            dst.get(brokenTag).output(src);
         }
     }
 }
