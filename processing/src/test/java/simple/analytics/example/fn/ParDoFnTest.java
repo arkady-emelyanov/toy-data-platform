@@ -34,7 +34,7 @@ public class ParDoFnTest implements Serializable {
     public void collectAgentsFnTest() {
         List<List<String>> source = Collections.singletonList(
                 Arrays.asList(
-                        "-",
+                        "a69aa587eee4",
                         "-",
                         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36"
                 )
@@ -45,7 +45,7 @@ public class ParDoFnTest implements Serializable {
                 .apply(ParDo.of(new CollectAgentsFn()));
 
         List<List<String>> expected = Collections.singletonList(
-                Arrays.asList("Desktop", "Apple Macintosh", "Mac OS X")
+                Arrays.asList("a69aa587eee4", "Desktop", "Apple Macintosh", "Mac OS X")
         );
 
         PAssert.that(received).containsInAnyOrder(expected);
