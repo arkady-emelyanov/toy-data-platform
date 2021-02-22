@@ -28,6 +28,20 @@ services:
     depends_on:
       - zookeeper
 
+  schema-registry:
+    image: confluentinc/cp-schema-registry:6.0.1
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka:9093"
+      SCHEMA_REGISTRY_HOST_NAME: "127.0.0.1"
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8085"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+      - kafka
+
 volumes:
   zkdata:
   zklogs:

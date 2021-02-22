@@ -463,7 +463,12 @@
             <version>1.0.2</version>
         </dependency>
 
-        <!-- kafka client -->
+        <!-- kafka beam integration and client -->
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-io-kafka</artifactId>
+            <version>${beam.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
