@@ -71,7 +71,7 @@ public class DataProcess {
         // Parse incoming requests into two PCollections:
         // tag: parsedTag = Collection<List<String>>
         // tag: brokenTag = Collection<byte[]>
-        PCollectionTuple parseResults = sourceStream.apply(
+        PCollectionTuple parsedResults = sourceStream.apply(
                 "Parse raw request",
                 ParDo.of(new ParseRequestFn(parsedTag, brokenTag))
                         .withOutputTags(parsedTag, TupleTagList.of(brokenTag))
@@ -80,7 +80,7 @@ public class DataProcess {
         // Write broken data into dlq topic (dead letter queue).
         // From monitoring perspective: DLQ message arrival means
         // incorrect LoadBalancer/ReverseProxy configuration.
-        parseResults
+        parsedResults
                 .get(brokenTag)
                 .apply(
                         "Write broken requests",
@@ -92,15 +92,15 @@ public class DataProcess {
                 );
 
         // Normalize URI of parsed stream
-        PCollection<List<String>> normalized = parseResults
+        PCollection<List<String>> normalizedResults = parsedResults
                 .get(parsedTag)
                 .apply("Normalize request uri", ParDo.of(new NormalizeUriFn()));
 
         // Once done, write final parsed user-agent into separate topic.
-        normalized
+        normalizedResults
                 .apply("Collect user-agents", ParDo.of(new CollectAgentsFn()))
-                .apply("Map to UserAgent", ParDo.of(new MapUserAgent()))
-                .apply("Convert UserAgent to JSON", ToJson.of())
+                .apply("Map List to UserAgent", ParDo.of(new MapUserAgent()))
+                .apply("Map UserAgent to JSON", ToJson.of())
                 .apply(
                         "Sink UserAgent JSON",
                         KafkaIO.<Void, String>write()
@@ -112,9 +112,9 @@ public class DataProcess {
 
         // Map normalized stream to Impression objects, and convert them to JSON.
         // Once done, write final parsed impression into separate topic.
-        normalized
-                .apply("Map to Impression", ParDo.of(new MapImpression()))
-                .apply("Convert Impression to JSON", ToJson.of())
+        normalizedResults
+                .apply("Map List to Impression", ParDo.of(new MapImpression()))
+                .apply("Map Impression to JSON", ToJson.of())
                 .apply(
                         "Sink Impression JSON",
                         KafkaIO.<Void, String>write()
