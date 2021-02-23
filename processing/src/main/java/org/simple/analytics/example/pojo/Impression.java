@@ -3,8 +3,6 @@ package org.simple.analytics.example.pojo;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
 
-import java.util.Objects;
-
 @DefaultSchema(JavaBeanSchema.class)
 public class Impression {
     public String pixelId;
