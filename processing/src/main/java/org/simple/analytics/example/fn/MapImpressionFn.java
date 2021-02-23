@@ -6,7 +6,7 @@ import org.simple.analytics.example.pojo.Impression;
 
 import java.util.List;
 
-public class MapImpression extends DoFn<List<String>, Impression> {
+public class MapImpressionFn extends DoFn<List<String>, Impression> {
 
     @ProcessElement
     public void processElement(@Element List<String> src, OutputReceiver<Impression> dst) {

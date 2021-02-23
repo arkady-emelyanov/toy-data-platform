@@ -38,7 +38,7 @@
         <libraries-bom.version>13.2.0</libraries-bom.version>
         <pubsub.version>v1-rev20200713-1.30.10</pubsub.version>
         <nemo.version>0.1</nemo.version>
-        <hadoop.version>2.10.1</hadoop.version>
+        <hadoop.version>3.3.0</hadoop.version>
 
         <spark-streaming.artifact.name>spark-streaming_2.12</spark-streaming.artifact.name>
         <spark.version>3.0.2</spark.version>
@@ -176,36 +176,6 @@
                 </dependency>
             </dependencies>
         </profile>
-
-        <profile>
-            <id>portable-runner</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <!-- Makes the PortableRunner available when running a pipeline. -->
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-portability-java</artifactId>
-                    <version>${beam.version}</version>
-                    <scope>runtime</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <profile>
-            <id>dataflow-runner</id>
-            <!-- Makes the DataflowRunner available when running a pipeline. -->
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-google-cloud-dataflow-java</artifactId>
-                    <version>${beam.version}</version>
-                    <scope>runtime</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-
         <profile>
             <id>flink-runner</id>
             <!-- Makes the FlinkRunner available when running a pipeline. -->
@@ -255,6 +225,26 @@
                     </exclusions>
                 </dependency>
                 <dependency>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-common</artifactId>
+                    <version>${hadoop.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-api</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-log4j12</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-client</artifactId>
+                    <version>${hadoop.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>com.fasterxml.jackson.module</groupId>
                     <artifactId>${jackson.artifact.name}</artifactId>
                     <version>${jackson.version}</version>
@@ -282,64 +272,6 @@
                             <artifactId>netty-handler</artifactId>
                         </exclusion>
                     </exclusions>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>samza-runner</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-samza</artifactId>
-                    <version>${beam.version}</version>
-                    <scope>runtime</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>twister2-runner</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-twister2</artifactId>
-                    <version>${beam.version}</version>
-                    <scope>runtime</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>nemo-runner</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.nemo</groupId>
-                    <artifactId>nemo-compiler-frontend-beam</artifactId>
-                    <version>${nemo.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-common</artifactId>
-                    <version>${hadoop.version}</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-api</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-log4j12</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>jet-runner</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-jet</artifactId>
-                    <version>${beam.version}</version>
-                    <scope>runtime</scope>
                 </dependency>
             </dependencies>
         </profile>
