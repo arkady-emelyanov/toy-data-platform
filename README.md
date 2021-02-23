@@ -1,19 +1,10 @@
 # Simple Analytics Example
 
-> Catch the impressions
+Toy start-up company providing web-analytics.
 
-Edge beacon service:
-    - Golang
-
-Message Bus:
-    - Apache Kafka
-
-Processing and Enrichment:
-    - Apache Beam
-
-OLAP backend:
-    - Apache Pinot
-
-Visualisation:
-    - Superset
-
+* Edge service: Golang
+* Message Bus: Apache Kafka
+* Stream processing: Apache Beam @ Java (Spark/Flink)
+* OLAP engine/ingest: Apache Pinot
+* Visualisation: Apache Superset
+* Simulation: Golang
