@@ -38,45 +38,37 @@ public class DataProcess {
     private static final TupleTag<byte[]> brokenTag = new TupleTag<>() {
     };
 
-    // Kafka consumer configs
-    private static final String groupId = "processing-consumer";
-    private static final String offsets = "earliest";
-
-    // Kafka topics
-    private static final String sourceTopic = "v1.raw";
-    private static final String impressionTopic = "v1.impressions";
-    private static final String userAgentTopic = "v1.user-agents";
-    private static final String dlqTopic = "v1.dlq";
-
     /**
      * Pipeline processor
      *
      * @param args command line arguments
      */
     public static void main(String[] args) {
-        String boostrapServer = "127.0.0.1:9092"; // TODO: make configurable
+        DataProcessOptions options = PipelineOptionsFactory.fromArgs(args)
+                .withValidation()
+                .as(DataProcessOptions.class);
 
-        PipelineOptions options = PipelineOptionsFactory.create();
-        Pipeline p = Pipeline.create(options);
-
+        // Prepare Kafka producer/consumer configurations
         Map<String, Object> consumerProps = new HashMap<>();
-        consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServer);
-        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsets);
+        consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, options.getBrokerUrl());
+        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, options.getGroupId());
+        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, options.getAutoResetOffsets());
 
         Map<String, Object> producerProps = new HashMap<>();
-        producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServer);
+        producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, options.getBrokerUrl());
         producerProps.put(ProducerConfig.ACKS_CONFIG, "all");
 
         // Create source PCollection from Kafka topic
         // Read byte[] values from source topic.
-        PCollection<byte[]> sourceStream = p.apply(KafkaIO.<byte[], byte[]>read()
-                .withConsumerConfigUpdates(consumerProps)
-                .withTopic(sourceTopic)
-                .withKeyDeserializer(ByteArrayDeserializer.class)
-                .withValueDeserializer(ByteArrayDeserializer.class)
-                .withReadCommitted()
-                .withoutMetadata()) // PCollection<KafkaRecord<..>> -> PCollection<byte[], byte[]>
+        Pipeline p = Pipeline.create(options);
+        PCollection<byte[]> sourceStream = p.apply(
+                KafkaIO.<byte[], byte[]>read()
+                        .withConsumerConfigUpdates(consumerProps)
+                        .withTopic(options.getRawTopic())
+                        .withKeyDeserializer(ByteArrayDeserializer.class)
+                        .withValueDeserializer(ByteArrayDeserializer.class)
+                        .withReadCommitted()
+                        .withoutMetadata()) // PCollection<KafkaRecord<..>> -> PCollection<byte[], byte[]>
                 .apply(Values.create()); // PCollection<byte[], byte[]> -> PCollection<byte[]>
 
         // Parse incoming requests into two PCollections:
@@ -94,7 +86,7 @@ public class DataProcess {
                 .get(brokenTag)
                 .apply(KafkaIO.<Void, byte[]>write()
                         .withProducerConfigUpdates(producerProps)
-                        .withTopic(dlqTopic)
+                        .withTopic(options.getDeadLetterQueueTopic())
                         .withValueSerializer(ByteArraySerializer.class)
                         .values()
                 );
@@ -109,7 +101,7 @@ public class DataProcess {
                 .apply(ToJson.of())
                 .apply(KafkaIO.<Void, String>write()
                         .withProducerConfigUpdates(producerProps)
-                        .withTopic(userAgentTopic)
+                        .withTopic(options.getUserAgentsTopic())
                         .withValueSerializer(StringSerializer.class)
                         .values());
 
@@ -123,7 +115,7 @@ public class DataProcess {
                 .apply(ToJson.of())
                 .apply(KafkaIO.<Void, String>write()
                         .withProducerConfigUpdates(producerProps)
-                        .withTopic(impressionTopic)
+                        .withTopic(options.getImpressionsTopic())
                         .withValueSerializer(StringSerializer.class)
                         .values());
 

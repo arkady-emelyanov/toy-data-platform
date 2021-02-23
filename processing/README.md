@@ -22,30 +22,22 @@ mvn compile exec:java \
 
 DirectRunner
 ```
-mvn compile exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
+mvn compile exec:java -Dexec.mainClass=org.simple.analytics.example.DataProcess \
     -Pdirect-runner \
-    -Dexec.args="--runner=DirectRunner \
-      --inputFile=../beacon/README.md \
-      --output=target/counts"
+    -Dexec.args="--runner=DirectRunner --brokerUrl=127.0.0.1:9092"
 ```
 
 Flink
 ```
-mvn compile exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
+mvn compile exec:java -Dexec.mainClass=org.simple.analytics.example.DataProcess \
     -Pflink-runner \
-    -Dexec.args="--runner=FlinkRunner \
-      --inputFile=../beacon/README.md \
-      --output=target/counts \
-      --filesToStage=target/word-count-beam-bundled-0.1.jar"
-
+    -Dexec.args="--runner=FlinkRunner --brokerUrl=127.0.0.1:9092"
 ```
 
 
 Spark
 ```
-mvn compile exec:java -Dexec.mainClass=org.apache.beam.examples.WordCount \
+mvn compile exec:java -Dexec.mainClass=org.simple.analytics.example.DataProcess \
     -Pspark-runner \
-    -Dexec.args="--runner=SparkRunner \
-      --inputFile=../beacon/README.md \
-      --output=target/counts"
+    -Dexec.args="--runner=SparkRunner --brokerUrl=127.0.0.1:9092"
 ```
