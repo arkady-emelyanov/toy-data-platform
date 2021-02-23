@@ -1,4 +1,4 @@
-module github.com/arkady-emelyanov/simple-analytics-example/beacon
+module github.com/arkady-emelyanov/simple-analytics-example/edge
 
 go 1.15
 
