@@ -43,7 +43,6 @@
         <spark-streaming.artifact.name>spark-streaming_2.12</spark-streaming.artifact.name>
         <spark.version>3.0.2</spark.version>
         <spark.paranamer.version>2.8</spark.paranamer.version>
-        <spark.netty.version>4.1.17.Final</spark.netty.version>
         <flink.artifact.name>beam-runners-flink-1.12</flink.artifact.name>
         <jackson.artifact.name>jackson-module-scala_2.12</jackson.artifact.name>
         <jackson.version>2.10.2</jackson.version>
@@ -125,7 +124,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>${project.artifactId}-bundled-${project.version}</finalName>
+                            <finalName>${project.artifactId}-${classifier}-${project.version}</finalName>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -167,6 +166,9 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+            <properties>
+                <classifier>direct</classifier>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.apache.beam</groupId>
@@ -179,6 +181,9 @@
         <profile>
             <id>flink-runner</id>
             <!-- Makes the FlinkRunner available when running a pipeline. -->
+            <properties>
+                <classifier>flink</classifier>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.apache.beam</groupId>
@@ -197,7 +202,7 @@
             <!-- Makes the SparkRunner available when running a pipeline. Additionally,
                  overrides some Spark dependencies to Beam-compatible versions. -->
             <properties>
-                <netty.version>${spark.netty.version}</netty.version>
+                <classifier>spark</classifier>
             </properties>
             <dependencies>
                 <dependency>
@@ -220,7 +225,23 @@
                     <exclusions>
                         <exclusion>
                             <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-log4j12</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.slf4j</groupId>
                             <artifactId>jul-to-slf4j</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>jcl-over-slf4j</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-all</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>jakarta.activation</groupId>
+                            <artifactId>jakarta.activation-api</artifactId>
                         </exclusion>
                     </exclusions>
                 </dependency>
@@ -228,11 +249,47 @@
                     <groupId>org.apache.hadoop</groupId>
                     <artifactId>hadoop-common</artifactId>
                     <version>${hadoop.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-handler</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>javax.activation</groupId>
+                            <artifactId>javax.activation-api</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>commons-logging</groupId>
+                            <artifactId>commons-logging</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-log4j12</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>com.sun.jersey</groupId>
+                            <artifactId>jersey-server</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>javax.ws.rs</groupId>
+                            <artifactId>jsr311-api</artifactId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.hadoop</groupId>
                     <artifactId>hadoop-client</artifactId>
                     <version>${hadoop.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>jakarta.activation</groupId>
+                            <artifactId>jakarta.activation-api</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>jakarta.xml.bind</groupId>
+                            <artifactId>jakarta.xml.bind-api</artifactId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.module</groupId>
@@ -240,28 +297,11 @@
                     <version>${jackson.version}</version>
                     <scope>runtime</scope>
                 </dependency>
-                <!-- https://mvnrepository.com/artifact/com.thoughtworks.paranamer/paranamer -->
                 <dependency>
                     <groupId>com.thoughtworks.paranamer</groupId>
                     <artifactId>paranamer</artifactId>
                     <version>${spark.paranamer.version}</version>
                     <scope>runtime</scope>
-                </dependency>
-                <!-- [BEAM-3519] GCP IO exposes netty on its API surface, causing conflicts with runners -->
-                <dependency>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
-                    <version>${beam.version}</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>io.grpc</groupId>
-                            <artifactId>grpc-netty</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>io.netty</groupId>
-                            <artifactId>netty-handler</artifactId>
-                        </exclusion>
-                    </exclusions>
                 </dependency>
             </dependencies>
         </profile>
@@ -280,6 +320,12 @@
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
             <version>${beam.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.annotation</groupId>
+                    <artifactId>javax.annotation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Dependencies below this line are specific dependencies needed by the examples code. -->
