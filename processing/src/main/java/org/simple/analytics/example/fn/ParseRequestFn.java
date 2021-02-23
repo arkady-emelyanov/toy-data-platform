@@ -1,9 +1,9 @@
 package org.simple.analytics.example.fn;
 
+import org.apache.beam.sdk.metrics.Counter;
+import org.apache.beam.sdk.metrics.Metrics;
 import org.apache.beam.sdk.transforms.DoFn;
 
-import org.apache.beam.sdk.schemas.Schema;
-import org.apache.beam.sdk.values.Row;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.Header;
@@ -22,6 +22,9 @@ import java.util.List;
  * The raw request parser.
  */
 public class ParseRequestFn extends DoFn<byte[], List<String>> {
+
+    private final Counter parsedCounter = Metrics.counter("parse", "parsed");
+    private final Counter brokenCounter = Metrics.counter("parse", "broken");
 
     private final TupleTag<List<String>> parsedTag;
     private final TupleTag<byte[]> brokenTag;
@@ -59,11 +62,13 @@ public class ParseRequestFn extends DoFn<byte[], List<String>> {
                     getHeaderValue(req, "x-forwarded-for"),
                     getHeaderValue(req, "user-agent")
             );
+            parsedCounter.inc();
             dst.get(parsedTag).output(respond);
 
         } catch (IOException | HttpException e) {
             // That should not be the case when Beacon is behind the ALB/NGINX Load Balancer.
             // Still, exception could happen if one of the required headers is missing.
+            brokenCounter.inc();
             dst.get(brokenTag).output(src);
         }
     }

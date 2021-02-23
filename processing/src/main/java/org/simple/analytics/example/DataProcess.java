@@ -58,19 +58,21 @@ public class DataProcess {
         // Read byte[] values from source topic.
         Pipeline p = Pipeline.create(options);
         PCollection<byte[]> sourceStream = p.apply(
+                "Read raw stream",
                 KafkaIO.<byte[], byte[]>read()
                         .withConsumerConfigUpdates(consumerProps)
                         .withTopic(options.getRawTopic())
                         .withKeyDeserializer(ByteArrayDeserializer.class)
                         .withValueDeserializer(ByteArrayDeserializer.class)
                         .withReadCommitted()
-                        .withoutMetadata()) // PCollection<KafkaRecord<..>> -> PCollection<byte[], byte[]>
-                .apply(Values.create()); // PCollection<byte[], byte[]> -> PCollection<byte[]>
+                        .withoutMetadata())
+                .apply("Extract KafkaRecord values", Values.create());
 
         // Parse incoming requests into two PCollections:
         // tag: parsedTag = Collection<List<String>>
         // tag: brokenTag = Collection<byte[]>
         PCollectionTuple parseResults = sourceStream.apply(
+                "Parse raw request",
                 ParDo.of(new ParseRequestFn(parsedTag, brokenTag))
                         .withOutputTags(parsedTag, TupleTagList.of(brokenTag))
         );
@@ -80,40 +82,47 @@ public class DataProcess {
         // incorrect LoadBalancer/ReverseProxy configuration.
         parseResults
                 .get(brokenTag)
-                .apply(KafkaIO.<Void, byte[]>write()
-                        .withProducerConfigUpdates(producerProps)
-                        .withTopic(options.getDeadLetterQueueTopic())
-                        .withValueSerializer(ByteArraySerializer.class)
-                        .values()
+                .apply(
+                        "Write broken requests",
+                        KafkaIO.<Void, byte[]>write()
+                                .withProducerConfigUpdates(producerProps)
+                                .withTopic(options.getDeadLetterQueueTopic())
+                                .withValueSerializer(ByteArraySerializer.class)
+                                .values()
                 );
 
-        // Analyze User-agent from parsed results.
-        // Once done, write final parsed user-agent
-        // into separate topic.
-        parseResults
+        // Normalize URI of parsed stream
+        PCollection<List<String>> normalized = parseResults
                 .get(parsedTag)
-                .apply(ParDo.of(new CollectAgentsFn()))
-                .apply(ParDo.of(new MapUserAgent()))
-                .apply(ToJson.of())
-                .apply(KafkaIO.<Void, String>write()
-                        .withProducerConfigUpdates(producerProps)
-                        .withTopic(options.getUserAgentsTopic())
-                        .withValueSerializer(StringSerializer.class)
-                        .values());
+                .apply("Normalize request uri", ParDo.of(new NormalizeUriFn()));
 
-        // Cleanup the request uri from parsed results.
-        // Once done, write final parsed impression
-        // into separate topic.
-        parseResults
-                .get(parsedTag)
-                .apply(ParDo.of(new NormalizeUriFn()))
-                .apply(ParDo.of(new MapImpression()))
-                .apply(ToJson.of())
-                .apply(KafkaIO.<Void, String>write()
-                        .withProducerConfigUpdates(producerProps)
-                        .withTopic(options.getImpressionsTopic())
-                        .withValueSerializer(StringSerializer.class)
-                        .values());
+        // Once done, write final parsed user-agent into separate topic.
+        normalized
+                .apply("Collect user-agents", ParDo.of(new CollectAgentsFn()))
+                .apply("Map to UserAgent", ParDo.of(new MapUserAgent()))
+                .apply("Convert UserAgent to JSON", ToJson.of())
+                .apply(
+                        "Sink UserAgent JSON",
+                        KafkaIO.<Void, String>write()
+                                .withProducerConfigUpdates(producerProps)
+                                .withTopic(options.getUserAgentsTopic())
+                                .withValueSerializer(StringSerializer.class)
+                                .values()
+                );
+
+        // Map normalized stream to Impression objects, and convert them to JSON.
+        // Once done, write final parsed impression into separate topic.
+        normalized
+                .apply("Map to Impression", ParDo.of(new MapImpression()))
+                .apply("Convert Impression to JSON", ToJson.of())
+                .apply(
+                        "Sink Impression JSON",
+                        KafkaIO.<Void, String>write()
+                                .withProducerConfigUpdates(producerProps)
+                                .withTopic(options.getImpressionsTopic())
+                                .withValueSerializer(StringSerializer.class)
+                                .values()
+                );
 
         // Start the pipeline.
         p.run().waitUntilFinish();
