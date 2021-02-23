@@ -1,4 +1,5 @@
 # Simulator
 
-Run inside of Kubernetes and make direct calls to beacon,
-using the defined protocol.
+```
+go run ./main.go -rate=20 -target=http://127.0.0.1:8080
+```
