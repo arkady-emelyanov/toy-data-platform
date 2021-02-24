@@ -1,2 +1,4 @@
 processing/target
-
+terraform/.terraform
+terraform/platform.tfstate
+terraform/platform.tfstate.*
