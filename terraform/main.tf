@@ -38,9 +38,9 @@ resource "kubernetes_namespace" "monitoring" {
 
 // grafana
 
-resource "kubernetes_namespace" "processing" {
+resource "kubernetes_namespace" "compute" {
   metadata {
-    name = "processing"
+    name = "compute"
   }
 }
 
