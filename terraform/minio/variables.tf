@@ -16,6 +16,12 @@ variable "command_image" {
   default = "minio/mc:edge"
 }
 
+variable "storage_class" {
+  type = string
+  description = "MiniO storage class"
+  default = "standard"
+}
+
 variable "disk_size" {
   type = string
   description = "MiniO disk size"

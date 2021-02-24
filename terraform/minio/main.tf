@@ -6,24 +6,24 @@ locals {
 
   bucket = "platform"
   endpoint = "${local.module_name}.${var.namespace}.svc.cluster.local:${var.http_port}"
-  alias = "http://${random_string.minio_access_key.result}:${random_string.minio_secret_key.result}@${local.endpoint}"
+  alias = "http://${random_string.access_key.result}:${random_string.secret_key.result}@${local.endpoint}"
 }
 
-resource "random_string" "minio_access_key" {
+resource "random_string" "access_key" {
   length = 20
   upper = true
   min_upper = 20
   special = false
 }
 
-resource "random_string" "minio_secret_key" {
+resource "random_string" "secret_key" {
   length = 20
   upper = true
   min_upper = 20
   special = false
 }
 
-resource "kubernetes_config_map" "minio_env" {
+resource "kubernetes_config_map" "environment" {
   metadata {
     name = local.module_name
     namespace = var.namespace
@@ -31,12 +31,12 @@ resource "kubernetes_config_map" "minio_env" {
   }
 
   data = {
-    MINIO_ACCESS_KEY = random_string.minio_access_key.result
-    MINIO_SECRET_KEY = random_string.minio_secret_key.result
+    MINIO_ACCESS_KEY = random_string.access_key.result
+    MINIO_SECRET_KEY = random_string.secret_key.result
   }
 }
 
-resource "kubernetes_service" "minio_service" {
+resource "kubernetes_service" "service" {
   metadata {
     name = local.module_name
     namespace = var.namespace
@@ -52,7 +52,7 @@ resource "kubernetes_service" "minio_service" {
   }
 }
 
-resource "kubernetes_persistent_volume_claim" "minio_pvc" {
+resource "kubernetes_persistent_volume_claim" "pvc" {
   wait_until_bound = true
 
   metadata {
@@ -61,6 +61,7 @@ resource "kubernetes_persistent_volume_claim" "minio_pvc" {
     labels = local.module_labels
   }
   spec {
+    storage_class_name = "standard"
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
@@ -70,7 +71,7 @@ resource "kubernetes_persistent_volume_claim" "minio_pvc" {
   }
 }
 
-resource "kubernetes_deployment" "minio_deployment" {
+resource "kubernetes_deployment" "deployment" {
   wait_for_rollout = true
 
   metadata {
@@ -107,7 +108,7 @@ resource "kubernetes_deployment" "minio_deployment" {
 
           env_from {
             config_map_ref {
-              name = kubernetes_config_map.minio_env.metadata[0].name
+              name = kubernetes_config_map.environment.metadata[0].name
             }
           }
 
@@ -133,7 +134,7 @@ resource "kubernetes_deployment" "minio_deployment" {
         volume {
           name = "minio-storage"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.minio_pvc.metadata[0].name
+            claim_name = kubernetes_persistent_volume_claim.pvc.metadata[0].name
           }
         }
       }
@@ -141,8 +142,8 @@ resource "kubernetes_deployment" "minio_deployment" {
   }
 }
 
-resource "kubernetes_job" "minio_create_bucket" {
-  depends_on = [kubernetes_deployment.minio_deployment]
+resource "kubernetes_job" "create_bucket" {
+  depends_on = [kubernetes_deployment.deployment]
   wait_for_completion = true
 
   metadata {

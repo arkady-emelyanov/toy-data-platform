@@ -6,7 +6,7 @@ output "minio_secret_key" {
   value = module.minio.secret_key
 }
 
-output "minio_bucket" {
+output "minio_bucket_name" {
   value = module.minio.bucket
 }
 

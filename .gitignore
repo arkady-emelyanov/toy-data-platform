@@ -1,4 +1,5 @@
 processing/target
 terraform/.terraform
+terraform/.platform.tfstate.lock.info
 terraform/platform.tfstate
 terraform/platform.tfstate.*
