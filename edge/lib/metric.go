@@ -20,8 +20,8 @@ func CreateMetricServer() *MetricServer {
 	})
 
 	reqDuration := prometheus.NewHistogram(prometheus.HistogramOpts{
-		Name: "beacon_hit_duration_seconds",
-		Help: "time of request processing",
+		Name:    "beacon_hit_duration_seconds",
+		Help:    "time of request processing",
 		Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 0.8},
 	})
 

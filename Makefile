@@ -1,8 +1,17 @@
-.PHONT: download_dependencies
-download_dependencies:
-	@echo "Downloading MaxMind GeoIP database"
-	@echo "..."
+.PHONT: make_images
+make_images:
+	@echo "Make required Docker images @ Minikube"
+	@echo "This could take a while..."
 
-.PHONY: beacon_fmt
-beacon_fmt:
-	gofmt -d -w -s -e ./beacon
+
+## Golang formatting
+.PHONY: edge_fmt
+edge_fmt:
+	gofmt -d -w -s -e ./edge
+
+.PHONY: simulator_fmt
+simulator_fmt:
+	gofmt -d -w -s -e ./edge
+
+.PHONY: fmt
+fmt: edge_fmt simulator_fmt
