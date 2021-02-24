@@ -28,7 +28,44 @@ services:
     depends_on:
       - zookeeper
 
+  pinot-controller:
+    image: apachepinot/pinot:0.6.0-jdk11
+    restart: unless-stopped
+    volumes:
+      - pinotcontroller:/tmp/data/controller
+    ports:
+      - "9000:9000"
+    command: StartController -zkAddress zookeeper:2181
+    depends_on:
+      - kafka
+
+  pinot-broker:
+    image: apachepinot/pinot:0.6.0-jdk11
+    restart: unless-stopped
+    ports:
+      - "8099:8099"
+    command: StartBroker -zkAddress zookeeper:2181
+    depends_on:
+      - zookeeper
+      - kafka
+      - pinot-controller
+
+  pinot-server:
+    image: apachepinot/pinot:0.6.0-jdk11
+    restart: unless-stopped
+    volumes:
+      - pinotserver:/tmp/data/server
+    ports:
+      - "8098:8098"
+    command: StartServer -zkAddress zookeeper:2181
+    depends_on:
+      - zookeeper
+      - kafka
+      - pinot-controller
+
 volumes:
   zkdata:
   zklogs:
   kafka:
+  pinotcontroller:
+  pinotserver:
