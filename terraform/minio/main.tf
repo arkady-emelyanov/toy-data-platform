@@ -147,7 +147,7 @@ resource "kubernetes_job" "create_bucket" {
   wait_for_completion = true
 
   metadata {
-    name = local.module_name
+    name = "${local.module_name}-create-bucket"
     namespace = var.namespace
     labels = local.module_labels
   }
