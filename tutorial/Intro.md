@@ -8,7 +8,7 @@ It's basically impossible to cover 360-degree technology view of modern Data pla
 
 During this tutorial, I'm going to implement extremely simple (a toy) Data platform, trying to cover as much important aspects as possible. I'll define "the problem statement" in a next section. 
 
-Unfotunately, some aspects will not be covered during this tutorial. Most of them related to Enterprise Architecture and not important in our toy Data platform. Here is very loose list of topics not covered in this tutorial: Security, CI/CD (IaC concept will be covered, though), Data product and Data catalog, [Data lineage](https://en.wikipedia.org/wiki/Data_lineage).
+Unfotunately, some aspects will not be covered during this tutorial. Most of them related to Enterprise Architecture and not important in our toy Data platform. Here is very loose list of topics not covered in this tutorial: Security, CI/CD (IaC concept will be covered, though), Data products and Data catalog, [Data lineage](https://en.wikipedia.org/wiki/Data_lineage), [Data governance](https://en.wikipedia.org/wiki/Data_governance).
 
 Here is the list of tools/technologies used in the tutorial:
 

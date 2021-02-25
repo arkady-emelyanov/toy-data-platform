@@ -86,18 +86,17 @@ public class RequestProcessParDo extends DoFn<KafkaRecord<byte[], byte[]>, Row> 
                 throw new HttpException("Empty 'X-Forwarded-For' header");
             }
 
-            String userAgent = getHeaderValue(req, "user-agent");
-            UserAgent ua = userAgentAnalyzer.parse(userAgent);
+            String userAgentHeader = getHeaderValue(req, "user-agent");
+            UserAgent userAgentObj = userAgentAnalyzer.parse(userAgentHeader);
 
-            // construct Row
             Row request = Row.withSchema(rowSchema)
                     .addValues(
                             src.getTimestamp(),
                             requestUri,
                             remoteAddr,
-                            ua.getValue("DeviceClass"),
-                            ua.getValue("DeviceName"),
-                            ua.getValue("OperatingSystemName")
+                            userAgentObj.getValue("DeviceClass"),
+                            userAgentObj.getValue("DeviceName"),
+                            userAgentObj.getValue("OperatingSystemName")
                     )
                     .build();
 
@@ -105,8 +104,6 @@ public class RequestProcessParDo extends DoFn<KafkaRecord<byte[], byte[]>, Row> 
             dst.get(parsedTag).output(request);
 
         } catch (IOException | HttpException e) {
-            // That should not be the case when Beacon is behind the ALB/NGINX Load Balancer.
-            // Still, exception could happen if one of the required headers is missing.
             brokenCounter.inc();
             dst.get(brokenTag).output(srcValue);
         }

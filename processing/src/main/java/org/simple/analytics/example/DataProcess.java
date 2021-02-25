@@ -55,6 +55,8 @@ public class DataProcess {
         producerProps.put(ProducerConfig.ACKS_CONFIG, "all");
 
         Pipeline processingPipeline = Pipeline.create(options);
+
+        // Create Kafka raw request stream
         PCollection<KafkaRecord<byte[], byte[]>> kafkaRawStream = processingPipeline
                 .apply(KafkaIO.<byte[], byte[]>read()
                         .withConsumerConfigUpdates(consumerProps)
@@ -64,7 +66,7 @@ public class DataProcess {
                         .withReadCommitted()
                 );
 
-        // Define our row schema
+        // Define our Row schema
         Schema rowSchema = Schema.builder()
                 .addInt64Field("timestamp")
                 .addStringField("pixel")
@@ -74,12 +76,12 @@ public class DataProcess {
                 .addStringField("operating_system")
                 .build();
 
-        // Parse incoming requests into two PCollections:
+        // Parse raw request stream into two PCollections
         PCollectionTuple parsedStream = kafkaRawStream
                 .apply(ParDo.of(new RequestProcessParDo(parsedTag, brokenTag, rowSchema))
                         .withOutputTags(parsedTag, TupleTagList.of(brokenTag)));
 
-        // Write broken data to DLQ topic
+        // Write broken request raw representation into DLQ topic
         parsedStream
                 .get(brokenTag)
                 .apply(KafkaIO.<Void, byte[]>write()
@@ -89,7 +91,7 @@ public class DataProcess {
                         .values()
                 );
 
-        // Write parsed data to Hits topic
+        // Write parsed request as JSON object into destination topic
         parsedStream
                 .get(parsedTag)
                 .setCoder(SchemaCoder.of(rowSchema))
