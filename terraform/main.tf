@@ -14,7 +14,11 @@ module "zookeeper" {
   namespace = kubernetes_namespace.storage.metadata[0].name
 }
 
-// Kafka
+module "kafka" {
+  source = "./kafka"
+  namespace = kubernetes_namespace.storage.metadata[0].name
+  zookeeper_servers = module.zookeeper.servers_string
+}
 
 // Pinot
 
