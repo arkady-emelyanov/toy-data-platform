@@ -60,12 +60,22 @@ flink run-application \
 	-c org.simple.analytics.example.DataProcess \
 	-Dkubernetes.rest-service.exposed.type=NodePort \
 	-Dkubernetes.service-account=compute-sa \
-	-Dkubernetes.cluster-id=processing-flink \
+	-Dkubernetes.cluster-id=flink-job \
 	-Dkubernetes.container.image=flink-job:1 \
+	-Dstate.backend=filesystem \
+	-Dstate.checkpoints.dir=s3p://platform/flink-checkpoints/ \
+	-Dstate.backend.fs.checkpointdir=s3p://platform/flink-checkpoints/ \
+	-Ds3.access-key=FEAQXFUIRMGWTMIGHSBW \
+	-Ds3.secret-key=FZEKQBDZKPJGOOUXPFHM \
+	-Ds3.endpoint=http://minio.storage.svc.cluster.local:9000 \
 	local:///job/processing-flink-0.1.jar \
 		--runner=FlinkRunner \
 		--brokerUrl=kafka-0.kafka.storage.svc.cluster.local:9092 \
 		--checkpointingInterval=10000
+```
+
+```
+kubectl delete deployment flink-job
 ```
 
 ### Spark
@@ -78,7 +88,7 @@ spark-submit \
     --name spark-job \
     --conf spark.kubernetes.context=minikube \
     --conf spark.kubernetes.container.image=spark-job:1 \
-    --conf spark.executor.instances=2 \
+    --conf spark.executor.instances=1 \
     --conf spark.kubernetes.driver.label.app=spark \
     --conf spark.kubernetes.executor.label.app=spark \
     --conf spark.kubernetes.authenticate.driver.serviceAccountName=compute-sa \

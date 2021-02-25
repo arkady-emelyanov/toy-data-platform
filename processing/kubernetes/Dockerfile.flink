@@ -1,4 +1,5 @@
 FROM flink:1.12.1-scala_2.12-java11
 
+ENV ENABLE_BUILT_IN_PLUGINS=flink-s3-fs-presto-1.12.1.jar
 RUN mkdir -p /job
 COPY target/processing-flink-0.1.jar /job/processing-flink-0.1.jar

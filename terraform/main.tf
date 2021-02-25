@@ -23,6 +23,14 @@ module "kafka" {
 
 // Pinot
 
+resource "kubernetes_namespace" "compute" {
+  metadata {
+    name = "compute"
+  }
+}
+
+// spark cluster
+
 resource "kubernetes_namespace" "monitoring" {
   metadata {
     name = "monitoring"

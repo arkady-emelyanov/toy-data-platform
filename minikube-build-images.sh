@@ -15,8 +15,8 @@ eval $(minikube docker-env --shell bash)
 #mvn -f processing/pom.xml clean package -Pflink-runner -DskipTests
 #docker build -f processing/kubernetes/Dockerfile.flink processing/ -t flink-job:1
 
-echo ">>> Building Spark job image"
-mvn -f processing/pom.xml clean package -Pspark-runner -DskipTests
-docker build -f processing/kubernetes/Dockerfile.spark processing/ -t spark-job:1
+#echo ">>> Building Spark job image"
+#mvn -f processing/pom.xml clean package -Pspark-runner -DskipTests
+#docker build -f processing/kubernetes/Dockerfile.spark processing/ -t spark-job:1
 
 echo ">>> Done!"
