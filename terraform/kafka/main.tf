@@ -93,7 +93,6 @@ resource "kubernetes_stateful_set" "deployment" {
               port = "client"
             }
           }
-
           liveness_probe {
             tcp_socket {
               port = "client"
@@ -113,7 +112,6 @@ resource "kubernetes_stateful_set" "deployment" {
             container_port = local.client_port
             name = "client"
           }
-
           env {
             name = "KAFKA_ZOOKEEPER_CONNECT"
             value = var.zookeeper_servers
@@ -137,6 +135,10 @@ resource "kubernetes_stateful_set" "deployment" {
           env {
             name = "KAFKA_AUTO_CREATE_TOPICS_ENABLE"
             value = "false"
+          }
+          env {
+            name = "KAFKA_CREATE_TOPICS"
+            value = var.topics
           }
           env {
             name = "__CONFIG_HASH"

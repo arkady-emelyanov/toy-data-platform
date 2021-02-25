@@ -18,6 +18,7 @@ module "kafka" {
   source = "./kafka"
   namespace = kubernetes_namespace.storage.metadata[0].name
   zookeeper_servers = module.zookeeper.servers_string
+  topics = "v1.raw:3:1,v1.hits:3:1,v1.dlq:3:1"
 }
 
 // Pinot

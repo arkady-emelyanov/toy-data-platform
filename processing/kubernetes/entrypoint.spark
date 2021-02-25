@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+export SPARK_CLASSPATH="${SPARK_HOME}/jars/*"
+export SPARK_DIST_CLASSPATH="$(${HADOOP_HOME}/bin/hadoop classpath)"
+
+case "$1" in
+  driver)
+    shift 1
+    CMD=(
+      "${SPARK_HOME}/bin/spark-submit"
+      --conf "spark.driver.bindAddress=$SPARK_DRIVER_BIND_ADDRESS"
+      --deploy-mode client
+      "$@"
+    )
+    ;;
+  executor)
+    shift 1
+    CMD=(
+      "${JAVA_HOME}/bin/java"
+      "${SPARK_EXECUTOR_JAVA_OPTS[@]}"
+      -Xms$SPARK_EXECUTOR_MEMORY
+      -Xmx$SPARK_EXECUTOR_MEMORY
+      -cp "$SPARK_CLASSPATH:$SPARK_DIST_CLASSPATH"
+      org.apache.spark.executor.CoarseGrainedExecutorBackend
+      --driver-url $SPARK_DRIVER_URL
+      --executor-id $SPARK_EXECUTOR_ID
+      --cores $SPARK_EXECUTOR_CORES
+      --app-id $SPARK_APPLICATION_ID
+      --hostname $SPARK_EXECUTOR_POD_IP
+    )
+    ;;
+  *)
+    echo "Non-spark-on-k8s command provided, proceeding in pass-through mode..."
+    CMD=("$@")
+    ;;
+esac
+
+echo "${CMD[@]}"
+exec /usr/bin/tini -s -- "${CMD[@]}"

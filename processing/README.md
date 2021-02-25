@@ -48,3 +48,46 @@ mvn compile exec:java \
 ```
 kafkacat -b 127.0.0.1:9092 -o end -C -t v1.hits
 ```
+
+
+## Submitting to Kubernetes
+
+### Flink
+https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html#kubernetes
+```
+flink run-application \
+	--target kubernetes-application \
+	-c org.simple.analytics.example.DataProcess \
+	-Dkubernetes.rest-service.exposed.type=NodePort \
+	-Dkubernetes.service-account=compute-sa \
+	-Dkubernetes.cluster-id=processing-flink \
+	-Dkubernetes.container.image=flink-job:1 \
+	local:///job/processing-flink-0.1.jar \
+		--runner=FlinkRunner \
+		--brokerUrl=kafka-0.kafka.storage.svc.cluster.local:9092 \
+		--checkpointingInterval=10000
+```
+
+### Spark
+https://spark.apache.org/docs/latest/running-on-kubernetes.html#configuration
+
+```
+spark-submit \
+    --master k8s://https://127.0.0.1:55008 \
+    --deploy-mode cluster \
+    --name spark-job \
+    --conf spark.kubernetes.context=minikube \
+    --conf spark.kubernetes.container.image=spark-job:1 \
+    --conf spark.executor.instances=2 \
+    --conf spark.kubernetes.driver.label.app=spark \
+    --conf spark.kubernetes.executor.label.app=spark \
+    --conf spark.kubernetes.authenticate.driver.serviceAccountName=compute-sa \
+    --class org.simple.analytics.example.DataProcess \
+    local:///job/processing-spark-0.1.jar \
+		--runner=SparkRunner \
+		--brokerUrl=kafka-0.kafka.storage.svc.cluster.local:9092
+```
+
+```
+kubectl delete pod -l app=spark
+```

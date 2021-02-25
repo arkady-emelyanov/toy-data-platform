@@ -1,9 +1,0 @@
-FROM flink:1.12.1-scala_2.12-java11
-
-USER root
-RUN mkdir -p /job
-COPY target/processing-flink-0.1.jar /job/processing-flink-0.1.jar
-
-# Official Flink image user:
-# @see: https://github.com/apache/flink-docker/blob/adc8432ea3ae7fa111172c2b3d3e6a923b9af4dd/1.12/scala_2.12-java11-debian/Dockerfile#L56
-USER 9999

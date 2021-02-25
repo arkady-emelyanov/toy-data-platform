@@ -31,3 +31,9 @@ variable "disk_size" {
   description = "Disk size"
   default = "250Mi"
 }
+
+variable "topics" {
+  type = string
+  description = "Topics to create"
+  default = ""
+}

@@ -1,0 +1,28 @@
+FROM openjdk:11-jdk-slim-buster
+ARG APACHE_MIRROR=https://apache-mirror.rbc.ru/pub/apache
+
+RUN apt-get update -qq \
+    && apt-get install -yqq bash curl tini \
+    && rm -rf /var/cache/apt/*
+
+RUN curl -L ${APACHE_MIRROR}/spark/spark-3.0.2/spark-3.0.2-bin-without-hadoop.tgz \
+    -o /tmp/spark-3.0.2-bin-without-hadoop.tar.gz \
+    && tar xf /tmp/spark-3.0.2-bin-without-hadoop.tar.gz -C /opt \
+    && mv /opt/spark-3.0.2-bin-without-hadoop /opt/spark \
+    && rm /tmp/spark-3.0.2-bin-without-hadoop.tar.gz
+
+RUN curl -L ${APACHE_MIRROR}/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz \
+    -o /tmp/hadoop-3.3.0.tar.gz \
+    && tar xf /tmp/hadoop-3.3.0.tar.gz -C /opt \
+    && mv /opt/hadoop-3.3.0 /opt/hadoop \
+    && rm /tmp/hadoop-3.3.0.tar.gz
+
+ENV HADOOP_HOME=/opt/hadoop \
+    SPARK_HOME=/opt/spark
+
+COPY kubernetes/entrypoint.spark /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+RUN mkdir -p /job
+COPY target/processing-spark-0.1.jar /job/processing-spark-0.1.jar
