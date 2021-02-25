@@ -1,13 +1,3 @@
-resource "kubernetes_namespace" "edge" {
-  metadata {
-    name = "edge"
-  }
-}
-
-// edge
-
-// nginx
-
 resource "kubernetes_namespace" "storage" {
   metadata {
     name = "storage"
@@ -38,16 +28,6 @@ resource "kubernetes_namespace" "monitoring" {
 
 // grafana
 
-resource "kubernetes_namespace" "compute" {
-  metadata {
-    name = "compute"
-  }
-}
-
-// flink
-
-// spark
-
 resource "kubernetes_namespace" "exploratory" {
   metadata {
     name = "exploratory"
@@ -55,4 +35,3 @@ resource "kubernetes_namespace" "exploratory" {
 }
 
 // superset
-

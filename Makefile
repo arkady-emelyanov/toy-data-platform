@@ -1,24 +1,21 @@
 .PHONT: images
 images:
-	# TODO: switch to $(minikube docker-env)
+	@eval $$(minikube docker-env) \
 	@echo ">>> Make required Docker images @ Minikube"
 	@echo ">>> This could take a while..."
-	@echo ""
-
 	@echo ">>> Building Edge Docker image..."
 	docker build -f edge/Dockerfile edge/ -t edge:1
-	@echo ""
-
 	@echo ">>> Building Simulator Docker image..."
 	docker build -f simulator/Dockerfile simulator/ -t simulator:1
-	@echo ""
-
+	@echo ">>> Building Flink jar image"
+	@cd processing && mvn clean package -Pflink-runner -DskipTests
+	docker build -f processing/Dockerfile.flink processing/ -t flink-app:1
 	@echo ">>> Done!"
 
 ## Minikube
 .PHONY: minikube
 minikube:
-	minikube start --driver hyperkit --memory 8G
+	minikube start --memory 8G --cpus=4 --driver docker
 
 ## Terraform
 .PHONY: tfinit

@@ -1,0 +1,9 @@
+FROM bitnami/spark:3.0.2-debian-10-r5
+
+USER root
+RUN mkdir -p /job
+COPY target/processing-spark-0.1.jar /job/processing-spark-0.1.jar
+
+# Bitnami Spark image user:
+# @see: https://github.com/bitnami/bitnami-docker-spark/blob/3.0.2-debian-10-r5/3/debian-10/Dockerfile#L31
+USER 1001
