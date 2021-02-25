@@ -17,7 +17,6 @@ DirectRunner
 ```
 mvn compile exec:java -Dexec.mainClass=org.simple.analytics.example.DataProcess \
     -Pdirect-runner \
-    -Djava.util.logging.config.file=src/main/resources/logging.properties \
     -Dexec.args="--runner=DirectRunner --brokerUrl=127.0.0.1:9092"
 ```
 

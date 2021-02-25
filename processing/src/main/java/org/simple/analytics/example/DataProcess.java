@@ -1,5 +1,13 @@
 package org.simple.analytics.example;
 
+import org.apache.beam.sdk.coders.ByteCoder;
+import org.apache.beam.sdk.coders.KvCoder;
+import org.apache.beam.sdk.coders.RowCoder;
+import org.apache.beam.sdk.coders.SerializableCoder;
+import org.apache.beam.sdk.io.kafka.KafkaRecord;
+import org.apache.beam.sdk.schemas.Schema;
+import org.apache.beam.sdk.schemas.SchemaCoder;
+import org.apache.beam.sdk.transforms.ToJson;
 import org.apache.beam.sdk.values.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -7,20 +15,15 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-import org.apache.beam.sdk.transforms.ToJson;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
 import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.Values;
 
-import org.simple.analytics.example.fn.*;
-import org.simple.analytics.example.transform.Impression;
-import org.simple.analytics.example.transform.Normalize;
-import org.simple.analytics.example.transform.UserAgent;
+import org.simple.analytics.example.pardo.*;
 
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -30,7 +33,7 @@ import java.util.Map;
 public class DataProcess {
 
     // Tag for parsed records, records will be processed further.
-    private static final TupleTag<List<String>> parsedTag = new TupleTag<>() {
+    private static final TupleTag<Row> parsedTag = new TupleTag<>() {
     };
 
     // Tag for broken records, will be written to DLQ topic
@@ -43,11 +46,12 @@ public class DataProcess {
      * @param args command line arguments
      */
     public static void main(String[] args) {
+        // Parse command-line options
         DataProcessOptions options = PipelineOptionsFactory.fromArgs(args)
                 .withValidation()
                 .as(DataProcessOptions.class);
 
-        // Prepare Kafka producer/consumer configurations
+        // Prepare Kafka producer/consumer configurations:
         Map<String, Object> consumerProps = new HashMap<>();
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, options.getBrokerUrl());
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, options.getGroupId());
@@ -57,32 +61,33 @@ public class DataProcess {
         producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, options.getBrokerUrl());
         producerProps.put(ProducerConfig.ACKS_CONFIG, "all");
 
-        // Create source PCollection from Kafka topic
-        // Read byte[] values from source topic.
-        Pipeline pipeline = Pipeline.create(options);
-        PCollection<KV<byte[], byte[]>> sourceStream = pipeline
+        Pipeline processingPipeline = Pipeline.create(options);
+        PCollection<KafkaRecord<byte[], byte[]>> kafkaRawStream = processingPipeline
                 .apply(KafkaIO.<byte[], byte[]>read()
                         .withConsumerConfigUpdates(consumerProps)
-                        .withTopic(options.getRawTopic())
+                        .withTopic(options.getSourceTopic())
                         .withKeyDeserializer(ByteArrayDeserializer.class)
                         .withValueDeserializer(ByteArrayDeserializer.class)
                         .withReadCommitted()
-                        .withoutMetadata()
                 );
+
+        // Define our row schema
+        Schema rowSchema = Schema.builder()
+                .addInt64Field("timestamp")
+                .addStringField("pixel")
+                .addNullableField("remote_addr", Schema.FieldType.STRING)
+                .addStringField("device_class")
+                .addStringField("device_name")
+                .addStringField("operating_system")
+                .build();
 
         // Parse incoming requests into two PCollections:
-        // tag: parsedTag = Collection<List<String>>
-        // tag: brokenTag = Collection<byte[]>
-        PCollectionTuple parsedResults = sourceStream
-                .apply(Values.create())
-                .apply(ParDo.of(new ParseRequestFn(parsedTag, brokenTag))
-                        .withOutputTags(parsedTag, TupleTagList.of(brokenTag))
-                );
+        PCollectionTuple parsedStream = kafkaRawStream
+                .apply(ParDo.of(new ProcessRequestDo(parsedTag, brokenTag, rowSchema))
+                        .withOutputTags(parsedTag, TupleTagList.of(brokenTag)));
 
-        // Write broken data into dlq topic (dead letter queue).
-        // From monitoring perspective: DLQ message arrival means
-        // incorrect LoadBalancer/ReverseProxy configuration.
-        parsedResults
+        // Write broken data to DLQ topic
+        parsedStream
                 .get(brokenTag)
                 .apply(KafkaIO.<Void, byte[]>write()
                         .withProducerConfigUpdates(producerProps)
@@ -91,33 +96,21 @@ public class DataProcess {
                         .values()
                 );
 
-        // Normalize URI of parsed stream
-        PCollection<List<String>> normalizedResults = parsedResults
+        // Write parsed data to Hits topic
+        parsedStream
                 .get(parsedTag)
-                .apply(new Normalize());
-
-        // Once done, write final parsed user-agent into separate topic.
-        normalizedResults
-                .apply(new UserAgent())
+                .setCoder(SchemaCoder.of(rowSchema))
+                .apply(ToJson.of())
                 .apply(KafkaIO.<Void, String>write()
                         .withProducerConfigUpdates(producerProps)
-                        .withTopic(options.getUserAgentsTopic())
+                        .withTopic(options.getHitsTopic())
                         .withValueSerializer(StringSerializer.class)
                         .values()
                 );
 
-        // Map normalized stream to Impression objects, and convert them to JSON.
-        // Once done, write final parsed impression into separate topic.
-        normalizedResults
-                .apply(new Impression())
-                .apply(KafkaIO.<Void, String>write()
-                        .withProducerConfigUpdates(producerProps)
-                        .withTopic(options.getImpressionsTopic())
-                        .withValueSerializer(StringSerializer.class)
-                        .values()
-                );
-
-        // Start the pipeline.
-        pipeline.run().waitUntilFinish();
+        // Start the Pipeline
+        processingPipeline
+                .run()
+                .waitUntilFinish();
     }
 }

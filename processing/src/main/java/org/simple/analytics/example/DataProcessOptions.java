@@ -13,7 +13,7 @@ public interface DataProcessOptions extends PipelineOptions {
     void setBrokerUrl(String brokerUrl);
 
     @Description("Consumer group.id")
-    @Default.String("processing-consumer")
+    @Default.String("stream-hits")
     String getGroupId();
 
     void setGroupId(String groupId);
@@ -26,21 +26,15 @@ public interface DataProcessOptions extends PipelineOptions {
 
     @Description("Topic for reading raw requests")
     @Default.String("v1.raw")
-    String getRawTopic();
+    String getSourceTopic();
 
-    void setRawTopic(String rawTopic);
+    void setSourceTopic(String rawTopic);
 
     @Description("Topic for writing impressions")
-    @Default.String("v1.impressions")
-    String getImpressionsTopic();
+    @Default.String("v1.hits")
+    String getHitsTopic();
 
-    void setImpressionsTopic(String impressionsTopic);
-
-    @Description("Topic for writing user-agents")
-    @Default.String("v1.user-agents")
-    String getUserAgentsTopic();
-
-    void setUserAgentsTopic(String userAgentsTopic);
+    void setHitsTopic(String impressionsTopic);
 
     @Description("Topic for writing broken raw requests")
     @Default.String("v1.dlq")
