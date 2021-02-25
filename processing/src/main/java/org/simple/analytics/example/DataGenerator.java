@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
  * Load mock data into Kafka broker
  * (used for testing purposes)
  */
-public class DataGen {
+public class DataGenerator {
 
     private static final Faker faker = new Faker();
     private static final String requestFmt = "GET /${pixel-id}.png HTTP/1.0\n" +

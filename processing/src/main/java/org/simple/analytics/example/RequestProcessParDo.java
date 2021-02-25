@@ -1,4 +1,4 @@
-package org.simple.analytics.example.pardo;
+package org.simple.analytics.example;
 
 import nl.basjes.parse.useragent.UserAgent;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
@@ -26,7 +26,7 @@ import java.io.IOException;
 /**
  * The raw request parser.
  */
-public class ProcessRequestDo extends DoFn<KafkaRecord<byte[], byte[]>, Row> {
+public class RequestProcessParDo extends DoFn<KafkaRecord<byte[], byte[]>, Row> {
 
     private final Counter parsedCounter = Metrics.counter("parse", "parsed");
     private final Counter brokenCounter = Metrics.counter("parse", "broken");
@@ -36,7 +36,7 @@ public class ProcessRequestDo extends DoFn<KafkaRecord<byte[], byte[]>, Row> {
     private final Schema rowSchema;
     private final UserAgentAnalyzer userAgentAnalyzer;
 
-    public ProcessRequestDo(TupleTag<Row> parsedTag, TupleTag<byte[]> brokenTag, Schema rowSchema) {
+    public RequestProcessParDo(TupleTag<Row> parsedTag, TupleTag<byte[]> brokenTag, Schema rowSchema) {
         this.parsedTag = parsedTag;
         this.brokenTag = brokenTag;
         this.rowSchema = rowSchema;

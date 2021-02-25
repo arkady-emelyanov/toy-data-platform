@@ -16,8 +16,6 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
 import org.apache.beam.sdk.transforms.ParDo;
 
-import org.simple.analytics.example.pardo.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,7 +76,7 @@ public class DataProcess {
 
         // Parse incoming requests into two PCollections:
         PCollectionTuple parsedStream = kafkaRawStream
-                .apply(ParDo.of(new ProcessRequestDo(parsedTag, brokenTag, rowSchema))
+                .apply(ParDo.of(new RequestProcessParDo(parsedTag, brokenTag, rowSchema))
                         .withOutputTags(parsedTag, TupleTagList.of(brokenTag)));
 
         // Write broken data to DLQ topic
