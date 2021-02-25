@@ -1,9 +1,5 @@
 package org.simple.analytics.example;
 
-import org.apache.beam.sdk.coders.ByteCoder;
-import org.apache.beam.sdk.coders.KvCoder;
-import org.apache.beam.sdk.coders.RowCoder;
-import org.apache.beam.sdk.coders.SerializableCoder;
 import org.apache.beam.sdk.io.kafka.KafkaRecord;
 import org.apache.beam.sdk.schemas.Schema;
 import org.apache.beam.sdk.schemas.SchemaCoder;
@@ -22,7 +18,6 @@ import org.apache.beam.sdk.transforms.ParDo;
 
 import org.simple.analytics.example.pardo.*;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
