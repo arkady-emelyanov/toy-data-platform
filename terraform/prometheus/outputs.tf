@@ -1,4 +1,4 @@
 output "endpoint" {
   depends_on = [kubernetes_stateful_set.deployment]
-  value = local.endpoint
+  value = "http://${local.endpoint}"
 }

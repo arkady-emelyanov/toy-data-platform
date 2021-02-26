@@ -9,6 +9,11 @@ module "minio" {
   namespace = kubernetes_namespace.storage.metadata[0].name
 }
 
+module "redis" {
+  source = "./redis"
+  namespace = kubernetes_namespace.storage.metadata[0].name
+}
+
 #module "zookeeper" {
 #  source = "./zookeeper"
 #  namespace = kubernetes_namespace.storage.metadata[0].name

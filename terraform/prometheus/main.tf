@@ -26,14 +26,13 @@ resource "kubernetes_config_map" "config" {
   }
 }
 
-resource "kubernetes_service" "headless" {
+resource "kubernetes_service" "service" {
   metadata {
     name = local.module_name
     namespace = var.namespace
     labels = local.module_labels
   }
   spec {
-    cluster_ip = "None"
     selector = local.module_labels
     port {
       port = var.http_port

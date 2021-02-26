@@ -18,6 +18,14 @@ output "minio_endpoint" {
   value = module.minio.endpoint
 }
 
+output "prometheus_endpoint" {
+  value = module.prometheus.endpoint
+}
+
+output "redis_endpoint" {
+  value = module.redis.endpoint
+}
+
 #output "kafka_servers" {
 #  value = module.kafka.servers_string
 #}
