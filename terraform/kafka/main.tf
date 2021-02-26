@@ -151,6 +151,8 @@ resource "kubernetes_stateful_set" "deployment" {
     volume_claim_template {
       metadata {
         name = "kafka-disk"
+        namespace = var.namespace
+        labels = local.module_labels
       }
       spec {
         storage_class_name = var.storage_class

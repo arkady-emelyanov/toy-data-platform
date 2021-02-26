@@ -208,6 +208,8 @@ resource "kubernetes_stateful_set" "deployment" {
     volume_claim_template {
       metadata {
         name = "${local.module_name}-logs"
+        namespace = var.namespace
+        labels = local.module_labels
       }
       spec {
         storage_class_name = var.storage_class
@@ -223,6 +225,8 @@ resource "kubernetes_stateful_set" "deployment" {
     volume_claim_template {
       metadata {
         name = "${local.module_name}-data"
+        namespace = var.namespace
+        labels = local.module_labels
       }
       spec {
         storage_class_name = var.storage_class

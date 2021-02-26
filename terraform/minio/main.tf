@@ -90,7 +90,9 @@ resource "kubernetes_stateful_set" "deployment" {
           image = var.server_image
           command = [
             "/usr/bin/docker-entrypoint.sh",
-            "server", "--address", ":${var.http_port}",
+            "server",
+            "--address",
+            ":${var.http_port}",
             local.data_path
           ]
 
@@ -132,6 +134,8 @@ resource "kubernetes_stateful_set" "deployment" {
     volume_claim_template {
       metadata {
         name = "minio-storage"
+        namespace = var.namespace
+        labels = local.module_labels
       }
       spec {
         storage_class_name = var.storage_class
