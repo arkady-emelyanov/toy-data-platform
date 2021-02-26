@@ -1,35 +1,20 @@
 locals {
-  module_name = "minio"
+  module_name = "prometheus"
   module_labels = {
     app = local.module_name
   }
 
   data_path = "/data"
-  bucket = "platform"
+  conf_path = "/conf"
 
   endpoint = "${local.module_name}.${var.namespace}.svc.cluster.local:${var.http_port}"
-  username = random_string.access_key.result
-  password = random_string.secret_key.result
-  endpoint_alias = "http://${local.username}:${local.password}@${local.endpoint}"
-
-  config_hash = sha1(join("\n", [local.username, local.password]))
+  prometheus_yaml = templatefile("${path.module}/configs/prometheus.yaml", {
+    http_port = var.http_port
+  })
+  config_hash = sha1(local.prometheus_yaml)
 }
 
-resource "random_string" "access_key" {
-  length = 10
-  min_upper = 10
-  upper = true
-  special = false
-}
-
-resource "random_string" "secret_key" {
-  length = 20
-  min_upper = 20
-  upper = true
-  special = false
-}
-
-resource "kubernetes_config_map" "environment" {
+resource "kubernetes_config_map" "config" {
   metadata {
     name = local.module_name
     namespace = var.namespace
@@ -37,18 +22,18 @@ resource "kubernetes_config_map" "environment" {
   }
 
   data = {
-    MINIO_ACCESS_KEY = random_string.access_key.result
-    MINIO_SECRET_KEY = random_string.secret_key.result
+    "prometheus.yaml" = local.prometheus_yaml
   }
 }
 
-resource "kubernetes_service" "service" {
+resource "kubernetes_service" "headless" {
   metadata {
     name = local.module_name
     namespace = var.namespace
     labels = local.module_labels
   }
   spec {
+    cluster_ip = "None"
     selector = local.module_labels
     port {
       port = var.http_port
@@ -68,8 +53,8 @@ resource "kubernetes_stateful_set" "deployment" {
   }
 
   spec {
-    replicas = 1
     service_name = local.module_name
+    replicas = 1
     pod_management_policy = "OrderedReady"
     update_strategy {
       type = "RollingUpdate"
@@ -89,9 +74,11 @@ resource "kubernetes_stateful_set" "deployment" {
           image_pull_policy = "IfNotPresent"
           image = var.server_image
           command = [
-            "/usr/bin/docker-entrypoint.sh",
-            "server", "--address", ":${var.http_port}",
-            local.data_path
+            "/bin/prometheus",
+            "--web.listen-address=:${var.http_port}",
+            "--config.file=${local.conf_path}/prometheus.yaml",
+            "--storage.tsdb.path=${local.data_path}",
+            "--storage.tsdb.retention.time=2d",
           ]
 
           port {
@@ -99,11 +86,6 @@ resource "kubernetes_stateful_set" "deployment" {
             name = "http"
           }
 
-          env_from {
-            config_map_ref {
-              name = kubernetes_config_map.environment.metadata[0].name
-            }
-          }
           env {
             name = "__CONFIG_HASH"
             value = local.config_hash
@@ -111,27 +93,39 @@ resource "kubernetes_stateful_set" "deployment" {
 
           liveness_probe {
             http_get {
-              path = "/minio/health/live"
+              path = "/-/healthy"
               port = "http"
             }
           }
           readiness_probe {
             http_get {
-              path = "/minio/health/live"
+              path = "/-/ready"
               port = "http"
             }
           }
 
           volume_mount {
             mount_path = local.data_path
-            name = "minio-storage"
+            name = "prometheus-storage"
+          }
+          volume_mount {
+            mount_path = local.conf_path
+            name = "prometheus-config"
+          }
+        }
+
+        volume {
+          name = "prometheus-config"
+          config_map {
+            name = kubernetes_config_map.config.metadata[0].name
           }
         }
       }
     }
+
     volume_claim_template {
       metadata {
-        name = "minio-storage"
+        name = "prometheus-storage"
       }
       spec {
         storage_class_name = var.storage_class
@@ -139,39 +133,6 @@ resource "kubernetes_stateful_set" "deployment" {
         resources {
           requests = {
             storage = var.disk_size
-          }
-        }
-      }
-    }
-
-  }
-}
-
-resource "kubernetes_job" "create_bucket" {
-  depends_on = [kubernetes_stateful_set.deployment]
-  wait_for_completion = true
-
-  metadata {
-    name = "${local.module_name}-create-bucket"
-    namespace = var.namespace
-    labels = local.module_labels
-  }
-  spec {
-    template {
-      metadata {
-        labels = local.module_labels
-      }
-      spec {
-        restart_policy = "Never"
-        container {
-          name = "job"
-          image_pull_policy = "IfNotPresent"
-          image = var.command_image
-          command = ["mc", "mb", "--ignore-existing", "platform/${local.bucket}"]
-
-          env {
-            name = "MC_HOST_platform"
-            value = local.endpoint_alias
           }
         }
       }
