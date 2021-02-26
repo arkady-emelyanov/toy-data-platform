@@ -33,14 +33,6 @@ module "postgres" {
 
 // druid
 
-#resource "kubernetes_namespace" "compute" {
-#  metadata {
-#    name = "compute"
-#  }
-#}
-#
-#// spark cluster
-#
 resource "kubernetes_namespace" "monitoring" {
   metadata {
     name = "monitoring"
@@ -50,4 +42,22 @@ resource "kubernetes_namespace" "monitoring" {
 module "prometheus" {
   source = "./prometheus"
   namespace = kubernetes_namespace.monitoring.metadata[0].name
+}
+
+resource "kubernetes_namespace" "exploratory" {
+  metadata {
+    name = "exploratory"
+  }
+}
+
+module "redash" {
+  source = "./redash"
+  namespace = kubernetes_namespace.exploratory.metadata[0].name
+
+  postgres_endpoint = module.postgres.endpoint
+  postgres_database = module.postgres.redash_database
+  postgres_username = module.postgres.redash_user
+  postgres_password = module.postgres.redash_password
+
+  redis_endpoint = module.redis.endpoint
 }

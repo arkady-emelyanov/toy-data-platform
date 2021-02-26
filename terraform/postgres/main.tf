@@ -140,6 +140,16 @@ resource "kubernetes_stateful_set" "deployment" {
               ]
             }
           }
+          liveness_probe {
+            exec {
+              command = [
+                "/usr/local/bin/pg_isready",
+                "-Upostgres",
+                "-h127.0.0.1",
+                "-p${local.client_port}",
+              ]
+            }
+          }
         }
 
         volume {

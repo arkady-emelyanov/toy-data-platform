@@ -26,6 +26,10 @@ output "redis_endpoint" {
   value = module.redis.endpoint
 }
 
+output "postgres_endpoint" {
+  value = module.postgres.endpoint
+}
+
 #output "kafka_servers" {
 #  value = module.kafka.servers_string
 #}
