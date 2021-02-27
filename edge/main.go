@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/arkady-emelyanov/simple-analytics-example/edge/lib"
+	"github.com/arkady-emelyanov/toy-data-platform/edge/lib"
 	"github.com/valyala/fasthttp"
 )
 

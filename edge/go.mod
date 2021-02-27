@@ -1,4 +1,4 @@
-module github.com/arkady-emelyanov/simple-analytics-example/edge
+module github.com/arkady-emelyanov/toy-data-platform/edge
 
 go 1.15
 

@@ -1,4 +1,4 @@
-module github.com/arkady-emelyanov/simple-analytics-example/simulator
+module github.com/arkady-emelyanov/toy-data-platform/simulator
 
 go 1.15
 
