@@ -42,3 +42,18 @@ variable "minio_secret_key" {
 variable "minio_bucket" {
   type = string
 }
+
+variable "storage_class" {
+  type = string
+  default = "standard"
+}
+
+variable "historical_disk_size" {
+  type = string
+  default = "250Mi"
+}
+
+variable "middlemanager_disk_size" {
+  type = string
+  default = "250Mi"
+}

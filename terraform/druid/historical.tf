@@ -1,4 +1,7 @@
-# Historical
+#
+# Druid Historical
+# @see: https://druid.apache.org/docs/latest/design/historical.html
+#
 locals {
   historical_client_port = 8080
   historical_labels = merge(local.module_labels, {
@@ -6,10 +9,8 @@ locals {
   })
 }
 
-# StatefulSet
-# @see: https://github.com/helm/charts/blob/master/incubator/druid/templates/historical/statefulset.yaml
-resource "kubernetes_deployment" "historical" {
-  depends_on = [kubernetes_deployment.coordinator_overlord]
+resource "kubernetes_stateful_set" "historical" {
+  depends_on = [kubernetes_deployment.coordinator]
   wait_for_rollout = true
 
   metadata {
@@ -18,6 +19,9 @@ resource "kubernetes_deployment" "historical" {
     labels = local.historical_labels
   }
   spec {
+    service_name = "${local.module_name}-historical"
+    replicas = 1
+
     selector {
       match_labels = local.historical_labels
     }
@@ -46,9 +50,44 @@ resource "kubernetes_deployment" "historical" {
             name = "client"
           }
 
-          // /status/health
+          volume_mount {
+            mount_path = "/opt/druid/var"
+            name = "${local.module_name}-historical"
+          }
+
+          readiness_probe {
+            http_get {
+              path = "/status/health"
+              port = "client"
+            }
+          }
+          liveness_probe {
+            period_seconds = 30
+            http_get {
+              path = "/status/health"
+              port = "client"
+            }
+          }
         }
       }
     }
+
+    volume_claim_template {
+      metadata {
+        name = "${local.module_name}-historical"
+        namespace = var.namespace
+        labels = local.historical_labels
+      }
+      spec {
+        storage_class_name = var.storage_class
+        access_modes = ["ReadWriteOnce"]
+        resources {
+          requests = {
+            storage = var.historical_disk_size
+          }
+        }
+      }
+    }
+
   }
 }

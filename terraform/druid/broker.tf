@@ -1,4 +1,7 @@
-# Broker
+#
+# Druid Broker
+# @see: https://druid.apache.org/docs/latest/design/broker.html
+#
 locals {
   broker_client_port = 8080
   broker_labels = merge(local.module_labels, {
@@ -7,7 +10,7 @@ locals {
 }
 
 resource "kubernetes_deployment" "broker" {
-  depends_on = [kubernetes_deployment.coordinator_overlord]
+  depends_on = [kubernetes_deployment.coordinator]
   wait_for_rollout = true
 
   metadata {
@@ -16,6 +19,7 @@ resource "kubernetes_deployment" "broker" {
     labels = local.broker_labels
   }
   spec {
+    replicas = 1
     selector {
       match_labels = local.broker_labels
     }
@@ -46,13 +50,13 @@ resource "kubernetes_deployment" "broker" {
           }
 
           readiness_probe {
-            initial_delay_seconds = 10
             http_get {
               path = "/status/health"
               port = "client"
             }
           }
           liveness_probe {
+            period_seconds = 30
             http_get {
               path = "/status/health"
               port = "client"

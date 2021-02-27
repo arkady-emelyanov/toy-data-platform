@@ -1,25 +1,32 @@
+#
+# Druid Coordinator (and Overlord)
+# when druid.coordinator.asOverlord.enabled is set to true
+#
+# @see: https://druid.apache.org/docs/latest/design/coordinator.html
+# @see: https://druid.apache.org/docs/latest/design/overlord.html
+#
 locals {
-  overload_client_port = 8080
-  overlord_labels = merge(local.module_labels, {
-    component = "overlord"
+  coordinator_client_port = 8080
+  coordinator_labels = merge(local.module_labels, {
+    component = "coordinator"
   })
 }
 
-resource "kubernetes_deployment" "coordinator_overlord" {
+resource "kubernetes_deployment" "coordinator" {
   wait_for_rollout = true
 
   metadata {
-    name = "${local.module_name}-overlord"
+    name = "${local.module_name}-coordinator"
     namespace = var.namespace
-    labels = local.overlord_labels
+    labels = local.coordinator_labels
   }
   spec {
     selector {
-      match_labels = local.overlord_labels
+      match_labels = local.coordinator_labels
     }
     template {
       metadata {
-        labels = local.overlord_labels
+        labels = local.coordinator_labels
       }
       spec {
         container {
@@ -35,22 +42,22 @@ resource "kubernetes_deployment" "coordinator_overlord" {
           }
           env {
             name = "druid_plaintextPort"
-            value = local.overload_client_port
+            value = local.coordinator_client_port
           }
 
           port {
-            container_port = local.overload_client_port
+            container_port = local.coordinator_client_port
             name = "client"
           }
 
           readiness_probe {
-            initial_delay_seconds = 10
             http_get {
               path = "/status/health"
               port = "client"
             }
           }
           liveness_probe {
+            period_seconds = 30
             http_get {
               path = "/status/health"
               port = "client"

@@ -16,12 +16,18 @@ resource "kubernetes_config_map" "config" {
   data = {
     DRUID_XMX = "256m"
     DRUID_XMS = "256m"
-    DRUID_LOG4J = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><Configuration status=\"WARN\"><Appenders><Console name=\"Console\" target=\"SYSTEM_OUT\"><PatternLayout pattern=\"%d{ISO8601} %p [%t] %c - %m%n\"/></Console></Appenders><Loggers><Root level=\"info\"><AppenderRef ref=\"Console\"/></Root><Logger name=\"org.apache.druid.jetty.RequestLog\" additivity=\"false\" level=\"DEBUG\"><AppenderRef ref=\"Console\"/></Logger></Loggers></Configuration>"
+    DRUID_LOG4J = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><Configuration status=\"WARN\"><Appenders><Console name=\"Console\" target=\"SYSTEM_OUT\"><PatternLayout pattern=\"%d{ISO8601} %p [%t] %c - %m%n\"/></Console></Appenders><Loggers><Root level=\"info\"><AppenderRef ref=\"Console\"/></Root><Logger name=\"org.apache.druid.jetty.RequestLog\" additivity=\"false\" level=\"INFO\"><AppenderRef ref=\"Console\"/></Logger></Loggers></Configuration>"
 
     druid_extensions_loadList = "[\"druid-s3-extensions\", \"druid-kafka-indexing-service\", \"postgresql-metadata-storage\"]"
     druid_startup_logging_logProperties = "true"
     druid_zk_service_host = var.zookeeper_servers
     druid_zk_paths_base = "/druid"
+
+    # Service discovery
+    druid_selectors_indexing_serviceName = "druid/overlord"
+    druid_selectors_coordinator_serviceName = "druid/coordinator"
+    druid_coordinator_asOverlord_enabled = "true"
+    druid_coordinator_asOverlord_overlordService = "druid/overlord"
 
     # Metadata storage
     druid_metadata_storage_type = "postgresql"
@@ -45,14 +51,13 @@ resource "kubernetes_config_map" "config" {
     druid_indexer_logs_s3Bucket = var.minio_bucket
     druid_indexer_logs_s3Prefix = "druid/indexing-logs"
 
-    # Service discovery
-    druid_selectors_indexing_serviceName = "druid/overlord"
-    druid_selectors_coordinator_serviceName = "druid/coordinator"
-
     # Storage type of double columns ommiting this will lead to index double as float at the storage layer
     druid_indexing_doubleStorage = "double"
 
+    # Druid Web console
     druid_sql_enable = "true"
+    druid_router_managementProxy_enabled = "true"
+
     druid_lookup_enableLookupSyncOnStartup = "false"
     druid_processing_numThreads = "2"
     druid_processing_numMergeBuffers = "2"

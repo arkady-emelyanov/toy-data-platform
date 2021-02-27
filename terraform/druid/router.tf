@@ -1,4 +1,10 @@
-# Router
+#
+# Druid Router Process
+# @see: https://druid.apache.org/docs/latest/design/router.html
+#
+# Router is required for Druid Console
+# @see: https://druid.apache.org/docs/latest/operations/druid-console.html
+#
 locals {
   router_client_port = 8080
   router_labels = merge(local.module_labels, {
@@ -23,7 +29,7 @@ resource "kubernetes_service" "router_service" {
 }
 
 resource "kubernetes_deployment" "router" {
-  depends_on = [kubernetes_deployment.coordinator_overlord]
+  depends_on = [kubernetes_deployment.coordinator]
   wait_for_rollout = true
 
   metadata {
@@ -62,18 +68,19 @@ resource "kubernetes_deployment" "router" {
           }
 
           readiness_probe {
-            initial_delay_seconds = 20
             http_get {
               path = "/status/health"
               port = "client"
             }
           }
           liveness_probe {
+            period_seconds = 30
             http_get {
               path = "/status/health"
               port = "client"
             }
           }
+
         }
       }
     }
