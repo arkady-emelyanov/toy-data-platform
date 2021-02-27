@@ -12,27 +12,34 @@ Toy start-up company providing web-analytics.
 
 # ToC
 
-* Intro
-  * Summarize knowledge, try to provide 360 degree overview
-  * Topics not covered: Security, CI/CD
+Intro
+
+* Summarize knowledge, try to provide 360 degree overview
+* Topics not covered: Security, CI/CD
 * Problem statement
+* Storage OLAP-like backend: Into
+* Observability: Intro
+* Visualization: Intro
 * High-level architecture
+
+Development
+
 * Edge service development: Go
+* Simulator service development: Go
 * Stream processing: Intro
 * Processing service development: Beam pipeline
 * Processing service development: Flink runner
 * Processing service development: Spark runner
-* Observability: Intro
-* Visualization: Intro
+
+Deployment
+
 * Deployment architecture
 * Terraform and Minikube
-* Flink/Spark clusters
 * Setting everything up (manual steps)
-  * Pinot
-  * Superset
-  * Prometheus
-  * Grafana
-* Simulator service development
+  * Druid
+  * Redash
+* Edge service deployment
 * Simulator deployment
+* Flink/Spark deployment
 * Check it out!
 * Summary
