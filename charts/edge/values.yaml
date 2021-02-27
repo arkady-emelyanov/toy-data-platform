@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: edge
+  tag: 1
+  pullPolicy: Never
+
+# Kubernetes Service parameters
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 31234
+
+# Edge service arguments
+arguments:
+  listen: 0.0.0.0:8080
+  bootstrapServer: 127.0.0.1:9092
+  topic: v1.raw
+  listenMetrics: 0.0.0.0:9100
+
+# Additional annotations (monitoring)
+podAnnotations:
+  "prometheus.io/scrape": true
+  "prometheus.io/path": /metrics
+  "prometheus.io/port": 9100

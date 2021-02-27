@@ -1,0 +1,11 @@
+replicaCount: 1
+
+image:
+  repository: simulator
+  tag: 1
+  pullPolicy: Never
+
+# Simulation service arguments
+arguments:
+  target: http://127.0.0.1:8080
+  rate: 1

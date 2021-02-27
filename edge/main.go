@@ -47,18 +47,26 @@ func main() {
 
 	// attach handler to http server
 	s.Handler = func(ctx *fasthttp.RequestCtx) {
-		start := ctx.ConnTime()
-		if _, err := ctx.Request.WriteTo(w); err != nil {
-			log.Printf("Write error: %s\n", err)
+		switch string(ctx.Path()) {
+		case "/-/ready":
+			// Kubernetes readiness/liveness check
+			ctx.Response.SetStatusCode(http.StatusOK)
+
+		default:
+			// End-user request handler
+			start := ctx.ConnTime()
+			if _, err := ctx.Request.WriteTo(w); err != nil {
+				log.Fatalf("Write error: %s\n", err)
+			}
+
+			ctx.Response.SetStatusCode(http.StatusOK)
+			ctx.Response.Header.Add("Cache-Control", "no-cache, no-store, must-revalidate")
+			ctx.Response.Header.Add("Content-Type", "image/gif")
+			ctx.Response.SetBody(gTransparentPixel)
+
+			// Register a request and time required for serving request
+			m.Hit(time.Since(start))
 		}
-
-		ctx.Response.SetStatusCode(http.StatusOK)
-		ctx.Response.Header.Add("Cache-Control", "no-cache, no-store, must-revalidate")
-		ctx.Response.Header.Add("Content-Type", "image/gif")
-		ctx.Response.SetBody(gTransparentPixel)
-
-		// Register a request and time required for serving request
-		m.Hit(time.Since(start))
 	}
 
 	// start servers
