@@ -191,12 +191,13 @@ resource "kubernetes_stateful_set" "deployment" {
             name = "${local.module_name}-data"
           }
 
-          liveness_probe {
+          readiness_probe {
+            initial_delay_seconds = 30
             exec {
               command = ["bash", "/app/probe.sh", local.client_port]
             }
           }
-          readiness_probe {
+          liveness_probe {
             exec {
               command = ["bash", "/app/probe.sh", local.client_port]
             }

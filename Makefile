@@ -1,7 +1,7 @@
 ## Minikube
 .PHONY: minikube
 minikube:
-	minikube start --memory 8G --cpus=4 --driver docker
+	minikube start --memory 10G --cpus=6 --driver docker
 
 ## Terraform
 .PHONY: tfinit
