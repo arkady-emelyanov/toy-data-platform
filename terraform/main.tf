@@ -1,4 +1,8 @@
-## Storage deployment namespace
+#
+# The Platform root module
+#
+
+# Storage deployment namespace
 resource "kubernetes_namespace" "storage" {
   metadata {
     name = "storage"
@@ -8,6 +12,8 @@ resource "kubernetes_namespace" "storage" {
 module "minio" {
   source = "./minio"
   namespace = kubernetes_namespace.storage.metadata[0].name
+
+  disk_size = "200Mi"
 }
 
 module "redis" {
@@ -18,11 +24,16 @@ module "redis" {
 module "zookeeper" {
   source = "./zookeeper"
   namespace = kubernetes_namespace.storage.metadata[0].name
+
+  data_disk_size = "100Mi"
+  logs_disk_size = "60Mi"
 }
 
 module "postgres" {
   source = "./postgres"
   namespace = kubernetes_namespace.storage.metadata[0].name
+
+  disk_size = "100Mi"
 }
 
 ## Message bus deployment namespace
@@ -35,6 +46,8 @@ resource "kubernetes_namespace" "streaming" {
 module "kafka" {
   source = "./kafka"
   namespace = kubernetes_namespace.streaming.metadata[0].name
+
+  disk_size = "250Mi"
   zookeeper_servers = module.zookeeper.servers_string
   topics = "v1.raw:3:1,v1.hits:3:1,v1.dlq:3:1"
 }
@@ -50,6 +63,8 @@ module "druid" {
   source = "./druid"
   namespace = kubernetes_namespace.olap.metadata[0].name
 
+  middlemanager_disk_size = "250Mi"
+  historical_disk_size = "250Mi"
   zookeeper_servers = module.zookeeper.servers_string
 
   minio_endpoint = module.minio.endpoint
@@ -73,9 +88,10 @@ resource "kubernetes_namespace" "monitoring" {
 module "prometheus" {
   source = "./prometheus"
   namespace = kubernetes_namespace.monitoring.metadata[0].name
+  disk_size = "250Mi"
 }
 
-## Dashboard
+## Dashboards/Exploratory
 resource "kubernetes_namespace" "dashboard" {
   metadata {
     name = "dashboard"

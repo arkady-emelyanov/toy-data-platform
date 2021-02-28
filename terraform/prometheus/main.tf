@@ -1,6 +1,6 @@
 #
-# Prometheus
-# https://prometheus.io/
+# Module installs Prometheus
+# Docker image source: https://github.com/prometheus/prometheus
 #
 locals {
   module_name = "prometheus"

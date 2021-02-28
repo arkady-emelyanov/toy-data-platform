@@ -1,4 +1,7 @@
-// @see: https://druid.apache.org/docs/latest/configuration/index.html
+#
+# Module installs Apache Druid
+# Docker image source: https://github.com/apache/druid/tree/master/distribution/docker
+#
 locals {
   module_name = "druid"
   module_labels = {
@@ -6,6 +9,7 @@ locals {
   }
 }
 
+# @see: https://druid.apache.org/docs/latest/configuration/index.html
 resource "kubernetes_config_map" "config" {
   metadata {
     name = local.module_name

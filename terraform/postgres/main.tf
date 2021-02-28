@@ -1,3 +1,7 @@
+#
+# Module installs PostgreSQL
+# Docker image source: https://github.com/docker-library/postgres
+#
 locals {
   module_name = "postgres"
   module_labels = {

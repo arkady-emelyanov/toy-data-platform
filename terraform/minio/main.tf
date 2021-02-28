@@ -1,3 +1,8 @@
+#
+# Module installs MiniO as StatefulSet
+# Bucket platform will be also created
+# Docker image source: https://github.com/minio/minio
+#
 locals {
   module_name = "minio"
   module_labels = {

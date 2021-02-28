@@ -1,3 +1,7 @@
+#
+# Module installs Apache Kafka as StatefulSet
+# Docker image source: https://github.com/wurstmeister/kafka-docker
+#
 locals {
   module_name = "kafka"
   module_labels = {

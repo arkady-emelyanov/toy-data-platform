@@ -1,44 +1,43 @@
 #
-# Druid MiddleManager
-# @see: https://druid.apache.org/docs/latest/design/middlemanager.html
+# Install Druid Historical
+# @see: https://druid.apache.org/docs/latest/design/historical.html
 #
 locals {
-  middlemanager_client_port = 8084
-  middlemanager_labels = merge(local.module_labels, {
-    component = "middlemanager"
+  historical_client_port = 8080
+  historical_labels = merge(local.module_labels, {
+    component = "historical"
   })
 }
 
-resource "kubernetes_stateful_set" "middle_manager" {
+resource "kubernetes_stateful_set" "historical" {
   depends_on = [kubernetes_deployment.coordinator]
   wait_for_rollout = true
 
   metadata {
-    name = "${local.module_name}-middlemanager"
+    name = "${local.module_name}-historical"
     namespace = var.namespace
-    labels = local.middlemanager_labels
+    labels = local.historical_labels
   }
   spec {
-    service_name = "${local.module_name}-middlemanager"
+    service_name = "${local.module_name}-historical"
     replicas = 1
     update_strategy {
       type = "RollingUpdate"
     }
 
     selector {
-      match_labels = local.middlemanager_labels
+      match_labels = local.historical_labels
     }
-
     template {
       metadata {
-        labels = local.middlemanager_labels
+        labels = local.historical_labels
       }
       spec {
         container {
           name = "server"
           image_pull_policy = "IfNotPresent"
           image = var.server_image
-          args = ["middleManager"]
+          args = ["historical"]
 
           env_from {
             config_map_ref {
@@ -47,17 +46,16 @@ resource "kubernetes_stateful_set" "middle_manager" {
           }
           env {
             name = "druid_plaintextPort"
-            value = local.middlemanager_client_port
+            value = local.historical_client_port
           }
-
           port {
-            container_port = local.middlemanager_client_port
+            container_port = local.historical_client_port
             name = "client"
           }
 
           volume_mount {
             mount_path = "/opt/druid/var"
-            name = "${local.module_name}-middlemanager"
+            name = "${local.module_name}-historical"
           }
 
           readiness_probe {
@@ -79,16 +77,16 @@ resource "kubernetes_stateful_set" "middle_manager" {
 
     volume_claim_template {
       metadata {
-        name = "${local.module_name}-middlemanager"
+        name = "${local.module_name}-historical"
         namespace = var.namespace
-        labels = local.middlemanager_labels
+        labels = local.historical_labels
       }
       spec {
         storage_class_name = var.storage_class
         access_modes = ["ReadWriteOnce"]
         resources {
           requests = {
-            storage = var.middlemanager_disk_size
+            storage = var.historical_disk_size
           }
         }
       }

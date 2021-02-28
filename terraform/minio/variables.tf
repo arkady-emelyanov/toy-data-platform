@@ -1,6 +1,6 @@
 variable "namespace" {
   type = string
-  description = "Namespace to install to"
+  description = "Namespace to deploy to"
 }
 
 // @see: https://hub.docker.com/r/minio/minio/tags
