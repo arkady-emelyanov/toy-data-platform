@@ -12,9 +12,7 @@ Unfotunately, some aspects will not be covered during this tutorial. Most of the
 
 Here is the list of tools/technologies used in the tutorial:
 
-* macOS
-* [GNU Make](https://www.gnu.org/software/make/) (bundled into Mac OS)
-* [Brew](https://brew.sh/)
+* [Kubernetes](https://kubernetes.io/)
 * [Apache Flink](https://flink.apache.org/)
 * [Apache Spark](https://spark.apache.org/)
 * [Apache Kafka](https://kafka.apache.org/)
