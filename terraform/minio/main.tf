@@ -10,9 +10,8 @@ locals {
   endpoint = "${local.module_name}.${var.namespace}.svc.cluster.local:${var.http_port}"
   username = random_string.access_key.result
   password = random_string.secret_key.result
-  endpoint_alias = "http://${local.username}:${local.password}@${local.endpoint}"
 
-  config_hash = sha1(join("\n", [local.username, local.password]))
+  endpoint_alias = "http://${local.username}:${local.password}@${local.endpoint}"
 }
 
 resource "random_string" "access_key" {
@@ -37,8 +36,8 @@ resource "kubernetes_config_map" "environment" {
   }
 
   data = {
-    MINIO_ACCESS_KEY = random_string.access_key.result
-    MINIO_SECRET_KEY = random_string.secret_key.result
+    MINIO_ACCESS_KEY = local.username
+    MINIO_SECRET_KEY = local.password
   }
 }
 
@@ -88,13 +87,7 @@ resource "kubernetes_stateful_set" "deployment" {
           name = "server"
           image_pull_policy = "IfNotPresent"
           image = var.server_image
-          command = [
-            "/usr/bin/docker-entrypoint.sh",
-            "server",
-            "--address",
-            ":${var.http_port}",
-            local.data_path
-          ]
+          args = ["server", "--address", ":${var.http_port}", local.data_path]
 
           port {
             container_port = var.http_port
@@ -105,10 +98,6 @@ resource "kubernetes_stateful_set" "deployment" {
             config_map_ref {
               name = kubernetes_config_map.environment.metadata[0].name
             }
-          }
-          env {
-            name = "__CONFIG_HASH"
-            value = local.config_hash
           }
 
           liveness_probe {

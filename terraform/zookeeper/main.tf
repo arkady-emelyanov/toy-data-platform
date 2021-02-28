@@ -29,24 +29,6 @@ locals {
   for s in local.server_list_raw:
   format("%s:%s", s["host"], local.client_port)
   ]
-
-  config_log4j_properties = file("${path.module}/configs/log4j.properties")
-  config_zoo_cfg = templatefile("${path.module}/configs/zoo.cfg", {
-    client_port = local.client_port
-    logs_path = local.logs_path
-    data_path = local.data_path
-    server_list = local.config_server_list
-  })
-
-  config_entrypoint_sh = file("${path.module}/scripts/entrypoint.sh")
-  config_probe_sh = file("${path.module}/scripts/probe.sh")
-
-  config_hash = sha1(join("\n", [
-    local.config_log4j_properties,
-    local.config_zoo_cfg,
-    local.config_entrypoint_sh,
-    local.config_probe_sh,
-  ]))
 }
 
 resource "kubernetes_config_map" "config" {
@@ -57,8 +39,13 @@ resource "kubernetes_config_map" "config" {
   }
 
   data = {
-    "log4j.properties" = local.config_log4j_properties
-    "zoo.cfg" = local.config_zoo_cfg
+    "log4j.properties" = file("${path.module}/configs/log4j.properties")
+    "zoo.cfg" = templatefile("${path.module}/configs/zoo.cfg", {
+      client_port = local.client_port
+      logs_path = local.logs_path
+      data_path = local.data_path
+      server_list = local.config_server_list
+    })
   }
 }
 
@@ -70,8 +57,8 @@ resource "kubernetes_config_map" "entrypoint" {
   }
 
   data = {
-    "entrypoint.sh" = local.config_entrypoint_sh
-    "probe.sh" = local.config_probe_sh
+    "entrypoint.sh" = file("${path.module}/scripts/entrypoint.sh")
+    "probe.sh" = file("${path.module}/scripts/probe.sh")
   }
 }
 
@@ -167,11 +154,6 @@ resource "kubernetes_stateful_set" "deployment" {
           port {
             container_port = local.leader_port
             name = "leader"
-          }
-
-          env {
-            name = "__CONFIG_HASH"
-            value = local.config_hash
           }
 
           volume_mount {

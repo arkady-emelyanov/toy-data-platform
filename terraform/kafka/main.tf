@@ -1,16 +1,11 @@
 locals {
   module_name = "kafka"
   module_labels = {
-    app = "kafka"
+    app = local.module_name
   }
 
   client_port = 9092
   log_dirs = "/kafka"
-
-  entrypoint_sh = file("${path.module}/scripts/entrypoint.sh")
-  config_hash = sha1(join("/", [
-    local.entrypoint_sh,
-  ]))
 
   server_domain = "${local.module_name}.${var.namespace}.svc.cluster.local"
   output_servers_list = [
@@ -44,7 +39,7 @@ resource "kubernetes_config_map" "entrypoint" {
   }
 
   data = {
-    "entrypoint.sh" = local.entrypoint_sh
+    "entrypoint.sh" = file("${path.module}/scripts/entrypoint.sh")
   }
 }
 
@@ -139,10 +134,6 @@ resource "kubernetes_stateful_set" "deployment" {
           env {
             name = "KAFKA_CREATE_TOPICS"
             value = var.topics
-          }
-          env {
-            name = "__CONFIG_HASH"
-            value = local.config_hash
           }
         }
       }

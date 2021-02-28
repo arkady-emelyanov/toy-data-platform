@@ -1,3 +1,7 @@
+#
+# Prometheus
+# https://prometheus.io/
+#
 locals {
   module_name = "prometheus"
   module_labels = {
@@ -6,12 +10,7 @@ locals {
 
   data_path = "/data"
   conf_path = "/conf"
-
   endpoint = "${local.module_name}.${var.namespace}.svc.cluster.local:${var.http_port}"
-  prometheus_yaml = templatefile("${path.module}/configs/prometheus.yaml", {
-    http_port = var.http_port
-  })
-  config_hash = sha1(local.prometheus_yaml)
 }
 
 resource "kubernetes_config_map" "config" {
@@ -22,7 +21,9 @@ resource "kubernetes_config_map" "config" {
   }
 
   data = {
-    "prometheus.yaml" = local.prometheus_yaml
+    "prometheus.yaml" = templatefile("${path.module}/configs/prometheus.yaml", {
+      http_port = var.http_port
+    })
   }
 }
 
@@ -39,6 +40,48 @@ resource "kubernetes_service" "service" {
       target_port = var.http_port
       name = "http"
     }
+  }
+}
+
+resource "kubernetes_cluster_role" "cluster_role" {
+  metadata {
+    name = local.module_name
+    labels = local.module_labels
+  }
+  rule {
+    api_groups = [""]
+    resources = ["nodes", "services", "pods", "endpoints"]
+    verbs = ["get", "list", "watch"]
+  }
+  rule {
+    api_groups = [""]
+    resources = ["configmaps"]
+    verbs = ["get"]
+  }
+}
+
+resource "kubernetes_service_account" "sa" {
+  metadata {
+    name = local.module_name
+    namespace = var.namespace
+    labels = local.module_labels
+  }
+  automount_service_account_token = true
+}
+
+resource "kubernetes_cluster_role_binding" "cluster_role_binding" {
+  metadata {
+    name = local.module_name
+    labels = local.module_labels
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind = "ClusterRole"
+    name = kubernetes_cluster_role.cluster_role.metadata[0].name
+  }
+  subject {
+    kind = "ServiceAccount"
+    name = kubernetes_service_account.sa.metadata[0].name
   }
 }
 
@@ -68,12 +111,13 @@ resource "kubernetes_stateful_set" "deployment" {
         labels = local.module_labels
       }
       spec {
+        service_account_name = kubernetes_service_account.sa.metadata[0].name
+        automount_service_account_token = true
         container {
           name = "server"
           image_pull_policy = "IfNotPresent"
           image = var.server_image
-          command = [
-            "/bin/prometheus",
+          args = [
             "--web.listen-address=:${var.http_port}",
             "--config.file=${local.conf_path}/prometheus.yaml",
             "--storage.tsdb.path=${local.data_path}",
@@ -85,17 +129,13 @@ resource "kubernetes_stateful_set" "deployment" {
             name = "http"
           }
 
-          env {
-            name = "__CONFIG_HASH"
-            value = local.config_hash
-          }
-
           liveness_probe {
             http_get {
               path = "/-/healthy"
               port = "http"
             }
           }
+
           readiness_probe {
             http_get {
               path = "/-/ready"
