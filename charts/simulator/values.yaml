@@ -7,5 +7,5 @@ image:
 
 # Simulation service arguments
 arguments:
-  target: http://127.0.0.1:8080
+  target: http://edge.default.svc.cluster.local:8080
   rate: 1

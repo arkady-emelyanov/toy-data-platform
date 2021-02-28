@@ -14,4 +14,6 @@ RUN go build -o app ./main.go
 
 FROM alpine:3.13.2
 COPY --from=build /src/app /
-CMD ["/app", "-target=http://127.0.0.1:8080", "-rate=5"]
+
+ENTRYPOINT ["/app"]
+CMD ["-target=http://127.0.0.1:8080", "-rate=5"]

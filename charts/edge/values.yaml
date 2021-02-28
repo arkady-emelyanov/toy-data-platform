@@ -5,21 +5,13 @@ image:
   tag: 1
   pullPolicy: Never
 
-# Kubernetes Service parameters
-service:
-  type: NodePort
-  port: 8080
-  nodePort: 31234
-
-# Edge service arguments
 arguments:
-  listen: 0.0.0.0:8080
-  bootstrapServer: 127.0.0.1:9092
+  listenPort: 8080
+  metricPort: 9100
+  bootstrapServer: kafka-0.kafka.streaming.svc.cluster.local:9092
   topic: v1.raw
-  listenMetrics: 0.0.0.0:9100
 
-# Additional annotations (monitoring)
 podAnnotations:
-  "prometheus.io/scrape": true
-  "prometheus.io/path": /metrics
-  "prometheus.io/port": 9100
+  "prometheus.io/scrape": "true"
+  "prometheus.io/path": "/metrics"
+  "prometheus.io/port": "9100"

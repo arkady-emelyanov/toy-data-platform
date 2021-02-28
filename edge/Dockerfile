@@ -14,4 +14,6 @@ RUN go build -o app ./main.go
 
 FROM alpine:3.13.2
 COPY --from=build /src/app /
-CMD ["/app", "-listen=0.0.0.0:8080", "-metric-listen=0.0.0.0:9100", "-stdout=true"]
+
+ENTRYPOINT ["/app"]
+CMD ["-listen=0.0.0.0:8080", "-metric-listen=0.0.0.0:9100", "-stdout=true"]

@@ -41,7 +41,7 @@ func (s *beaconHitSource) Read(p []byte) (int, error) {
 		[]string{
 			"GET %s/%s.png",
 			"Host: %s",
-			"X-Forwared-For: %s",
+			"X-Forwarded-For: %s",
 			"User-Agent: %s",
 			"\n",
 		},

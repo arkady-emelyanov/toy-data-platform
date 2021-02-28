@@ -65,12 +65,13 @@ flink run-application \
 	-Dstate.backend=filesystem \
 	-Dstate.checkpoints.dir=s3p://platform/flink-checkpoints/ \
 	-Dstate.backend.fs.checkpointdir=s3p://platform/flink-checkpoints/ \
-	-Ds3.access-key=FEAQXFUIRMGWTMIGHSBW \
-	-Ds3.secret-key=FZEKQBDZKPJGOOUXPFHM \
+	-Ds3.access-key=GVHSBBJGBB \
+	-Ds3.secret-key=DOSGABDPMOZBBVOQEYFQ \
 	-Ds3.endpoint=http://minio.storage.svc.cluster.local:9000 \
+	-Ds3.path.style.access=true \
 	local:///job/processing-flink-0.1.jar \
 		--runner=FlinkRunner \
-		--brokerUrl=kafka-0.kafka.storage.svc.cluster.local:9092 \
+		--brokerUrl=kafka-0.kafka.streaming.svc.cluster.local:9092 \
 		--checkpointingInterval=10000
 ```
 

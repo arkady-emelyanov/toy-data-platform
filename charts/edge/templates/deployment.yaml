@@ -5,9 +5,7 @@ metadata:
   labels:
     {{- include "edge.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "edge.selectorLabels" . | nindent 6 }}
@@ -24,15 +22,24 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "-listen=0.0.0.0:{{ .Values.arguments.listenPort }}"
+            - "-metric-listen=0.0.0.0:{{ .Values.arguments.metricPort }}"
+            - "-bootstrap-server={{ .Values.arguments.bootstrapServer }}"
+            - "-topic={{ .Values.arguments.topic }}"
+            - "-stdout=false"
           ports:
             - name: http
-              containerPort: 80
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
+              containerPort: {{ .Values.arguments.listenPort }}
+
+            - name: metrics
+              containerPort: {{ .Values.arguments.metricPort }}
+
           readinessProbe:
             httpGet:
-              path: /
+              path: /-/ready
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /-/ready
               port: http

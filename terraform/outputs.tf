@@ -30,10 +30,6 @@ output "postgres_endpoint" {
   value = module.postgres.endpoint
 }
 
-#output "kafka_servers" {
-#  value = module.kafka.servers_string
-#}
-#
-#output "zookeeper_servers" {
-#  value = module.zookeeper.servers_string
-#}
+output "kafka_servers" {
+  value = module.kafka.servers_string
+}
