@@ -53,11 +53,6 @@ resource "kubernetes_cluster_role" "cluster_role" {
     resources = ["nodes", "services", "pods", "endpoints"]
     verbs = ["get", "list", "watch"]
   }
-  rule {
-    api_groups = [""]
-    resources = ["configmaps"]
-    verbs = ["get"]
-  }
 }
 
 resource "kubernetes_service_account" "sa" {
@@ -82,6 +77,7 @@ resource "kubernetes_cluster_role_binding" "cluster_role_binding" {
   subject {
     kind = "ServiceAccount"
     name = kubernetes_service_account.sa.metadata[0].name
+    namespace = kubernetes_service_account.sa.metadata[0].namespace
   }
 }
 
@@ -113,6 +109,7 @@ resource "kubernetes_stateful_set" "deployment" {
       spec {
         service_account_name = kubernetes_service_account.sa.metadata[0].name
         automount_service_account_token = true
+
         container {
           name = "server"
           image_pull_policy = "IfNotPresent"

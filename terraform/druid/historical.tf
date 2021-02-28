@@ -21,6 +21,9 @@ resource "kubernetes_stateful_set" "historical" {
   spec {
     service_name = "${local.module_name}-historical"
     replicas = 1
+    update_strategy {
+      type = "RollingUpdate"
+    }
 
     selector {
       match_labels = local.historical_labels

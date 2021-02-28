@@ -21,6 +21,9 @@ resource "kubernetes_stateful_set" "middle_manager" {
   spec {
     service_name = "${local.module_name}-middlemanager"
     replicas = 1
+    update_strategy {
+      type = "RollingUpdate"
+    }
 
     selector {
       match_labels = local.middlemanager_labels
