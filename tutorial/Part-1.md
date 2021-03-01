@@ -34,3 +34,46 @@ Here is the list of tools/technologies used in the tutorial:
 As you can see, it's quite big. But don't worry, developer tools installation instructions will be provided later in the tutorial.
 
 Shall we start?
+
+
+# The Problem
+
+So, we are going to build a "Data Platform". Let's first define problem we want to address. So, here is the simple diagram:
+
+![problem](./overview.png)
+
+The idea is very simple: the website owner puts HTML `<img>` tag on a website page. When user opens any website page, user's browser automatically makes request to our domain. Our platform stores HTTP request metadata and responds with 1x1 transparent pixel.
+
+Later, using the dashboards data platform provides, website owner can see how many visitors website has and get aggregated insights of user browsers and operating systems.
+
+Simple task, right? Not really.
+
+Let's say our company (which provides analytics and owns data platform), goes planet scale. Here, we entering the world of BigData. Therefore, our platform should be scalable.
+
+Bigger scale, bigger operational problems.
+
+![citizens](./citizens.png)
+
+Our platform needs to be reliable, feature packed and it would be awesome to provide data access to data science engineers.
+
+
+# The process
+
+Before going into details of Data Platform architecture, let's first design a scalable dataflow process for our primary goal.
+
+Here is simple process diagram:
+
+![process](./process.png)
+
+So, on the highest level, the process is pretty straightforward:
+
+* Web server receives pixel request and stores HTTP metadata in some raw storage
+* Later processing job comes into play, process the raw storage, parses the request, identifies the browser and operating system out of `User-agent` request header and puts clean metadata to clean storage.
+* Finally, dashboard service queries clean storage and display analytics.
+
+Why not parse, validate and put right to the clean storage and avoid having raw storage and processing job? Well, since our pixel is loaded on the page, latency is crucial for our web service, any delays negatively affect the website user experience.
+
+So, to save CPU cycles, minimize latency and make our website user happy, we want to delay any heavy computations during pixel request phase.
+
+Again, we will make techology mapping later, at this point, just overview part.
+
