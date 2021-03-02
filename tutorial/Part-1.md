@@ -34,12 +34,6 @@ Simple task, right? Not really.
 
 Let's say our company (which provides analytics and owns data platform), goes planet scale. Here, we entering the world of BigData. Therefore, our platform should be scalable.
 
-Bigger scale, bigger operational problems.
-
-![citizens](./citizens.png)
-
-Our platform needs to be reliable, feature packed and it would be awesome to provide data access to data science engineers.
-
 
 # The process
 
@@ -52,8 +46,10 @@ Here is simple process diagram:
 So, on the highest level, the process is pretty straightforward:
 
 * Web server receives pixel request and stores HTTP metadata in some raw storage
-* Later processing job comes into play, process the raw storage, parses the request, identifies the browser and operating system out of `User-Agent` request header and puts clean metadata to clean storage.
+* Later processing job comes into play, process the raw storage, parses the request, identifies the browser and operating system out of `User-Agent` request header and puts clean metadata to the clean storage.
 * Finally, dashboard service queries clean storage and display analytics.
+
+Ok, 
 
 Why not parse, validate and put right to the clean storage and avoid having raw storage and processing job? Well, since our pixel is loaded on the page, latency is crucial for our web service, any delays negatively affect the website user experience.
 
