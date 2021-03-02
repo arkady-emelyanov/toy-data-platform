@@ -67,8 +67,7 @@ TODO: why we should decouple, and add so much moving parts.
 Here is the list of tools/technologies used in the tutorial:
 
 * [Kubernetes](https://kubernetes.io/)
-* [Apache Flink](https://flink.apache.org/)
-* [Apache Spark](https://spark.apache.org/)
+* [Apache Flink](https://flink.apache.org/) or [Apache Spark](https://spark.apache.org/)
 * [Apache Kafka](https://kafka.apache.org/)
 * [Apache ZooKeeper](https://zookeeper.apache.org/)
 * [Apache Druid](https://druid.apache.org/)
