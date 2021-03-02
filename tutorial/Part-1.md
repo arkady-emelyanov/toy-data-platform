@@ -26,7 +26,7 @@ TODO: building a startup company
 
 Let's first define problem we want to address. So, here is the simple diagram:
 
-![problem](./overview.png)
+![problem](./images/part-1-overview.png)
 
 The idea is very simple: the website owner puts HTML `<img>` tag on a website page. When user opens any website page, user's browser automatically makes request to our domain. Our platform stores HTTP request metadata and responds with 1x1 transparent pixel.
 
@@ -43,30 +43,33 @@ Before going into details of Data Platform architecture, let's first design a sc
 
 Here is simple process diagram:
 
-![process](./process.png)
+![process](./images/part-1-process.png)
 
 So, at the highest level, the process is pretty straightforward:
 
 * Web server receives HTTP request, stores HTTP request metadata in a some raw storage and responds back with 1x1 pixel
-* Long-runnig processing job fetch unprocessed requests from a raw storage, parses processes it and write results into clean storage
+* Long-runnig processing job fetches the unprocessed requests from a raw storage, parses them and write results into clean storage
 * Dashboard service queries clean storage and display analytics.
-
 
 TODO: why we should decouple, and add so much moving parts.
 
 
 # Architecture overview
 
-TODO: name things properly
+![architecture](./images/part-1-architecture.png)
 
-![architecture](./architecture.png)
+TODO: name things properly. Split processing job into two jobs: transform job and ingest job (why?)
 
 TODO: why processing job doesn't write directly to long-term storage (why ingestion job is required), what is monitoring?
 
 
 # Technology mapping
 
-Redraw architecture with technologies mapping.
+TODO: Redraw architecture with technologies mapping.
+
+
+
+# Full technology landscape
 
 Here is the list of tools/technologies used in the tutorial:
 
