@@ -34,7 +34,7 @@ Later, using the dashboards data platform provides, website owner can see how ma
 
 Simple task, right? Not really.
 
-Let's say our company (which provides analytics and owns data platform), goes planet scale. Here, we entering the world of BigData. Therefore, our platform should be scalable.
+Let's imagine our company (which provides analytics and owns data platform), goes internet scale. And right here, we entering the world of BigData. Therefore, our whole platform should be scalable. 
 
 
 # The process
