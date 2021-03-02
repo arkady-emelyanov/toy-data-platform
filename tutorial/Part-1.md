@@ -22,6 +22,8 @@ Shall we start?
 
 # The Problem
 
+TODO: building a startup company
+
 Let's first define problem we want to address. So, here is the simple diagram:
 
 ![problem](./overview.png)
@@ -43,24 +45,21 @@ Here is simple process diagram:
 
 ![process](./process.png)
 
-So, on the highest level, the process is pretty straightforward:
+So, at the highest level, the process is pretty straightforward:
 
-* Web server receives pixel request and stores HTTP metadata in some raw storage
-* Later processing job comes into play, process the raw storage, parses the request, identifies the browser and operating system out of `User-Agent` request header and puts clean metadata to the clean storage.
-* Finally, dashboard service queries clean storage and display analytics.
+* Web server receives HTTP request, stores HTTP request metadata in a some raw storage and responds back with 1x1 pixel
+* Long-runnig processing job fetch unprocessed requests from a raw storage, parses processes it and write results into clean storage
+* Dashboard service queries clean storage and display analytics.
 
-Ok, 
 
-Why not parse, validate and put right to the clean storage and avoid having raw storage and processing job? Well, since our pixel is loaded on the page, latency is crucial for our web service, any delays negatively affect the website user experience.
-
-So, to save CPU cycles, minimize latency and make our website user happy, we want to delay any heavy computations during pixel request phase.
-
-Again, we will make techology mapping later, at this point, just overview part.
+TODO: why we should decouple, and add so much moving parts.
 
 
 # Architecture overview
 
 ![architecture](./architecture.png)
+
+
 
 
 # Technology mapping
