@@ -57,12 +57,16 @@ TODO: why we should decouple, and add so much moving parts.
 
 # Architecture overview
 
+TODO: name things properly
+
 ![architecture](./architecture.png)
 
-
+TODO: why processing job doesn't write directly to long-term storage (why ingestion job is required), what is monitoring?
 
 
 # Technology mapping
+
+Redraw architecture with technologies mapping.
 
 Here is the list of tools/technologies used in the tutorial:
 
