@@ -14,6 +14,7 @@ services:
     restart: unless-stopped
     ports:
       - "9092:9092"
+      - "9998:9998"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -23,6 +24,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INT
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
       KAFKA_CREATE_TOPICS: "v1.raw:3:1,v1.hits:3:1,v1.dlq:3:1"
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=127.0.0.1 -Djava.net.preferIPv4Stack=true -Dcom.sun.management.jmxremote.rmi.port=9998"
+      JMX_PORT: 9998
     volumes:
       - kafka:/kafka
     depends_on:
