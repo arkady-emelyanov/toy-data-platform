@@ -1,24 +1,6 @@
 # Intro
 
-In a modern world, [data is a new oil](https://www.forbes.com/sites/forbestechcouncil/2019/11/15/data-is-the-new-oil-and-thats-a-good-thing/?sh=647471ab7304). Data platform design and implementation skill becomes crucial. There are lot of tutorials covering narrow topics related to the data processing, but it's hard to get ten-thousands feet overview. The idea of the tutorial is to provide an idea of how such data platforms could be built. 
-
-But what is a data platform, anyway? 
-
-Well, I took the definition from [Looker](https://looker.com/definitions/data-platform):
-
-> A data platform is an integrated technology solution that allows data located in database(s) to be governed, accessed, and delivered to users, data applications, or other technologies for strategic business purposes.
-
-
-Right now, there are two approaches to process the data: batch and streaming, in a wider sense also known as [Lambda](https://en.wikipedia.org/wiki/Lambda_architecture) and Kappa architectures (in reality, almost all data platform are hybrids, where batch and stream processing is co-exists).
-
-During this tutorial, I'm going to implement extremely simple (a toy) data platform, trying to cover as much important aspects as possible. I'll define "the problem statement" in a next section. 
-
-Unfotunately, some aspects will not be covered during this tutorial. Most of them related to Enterprise Architecture and not important in our toy data platform. 
-
-Here is very loose list of topics not covered in this tutorial: Security, CI/CD (IaC concept will be covered, though), Data products and Data catalog, [Data lineage](https://en.wikipedia.org/wiki/Data_lineage), [Data governance](https://en.wikipedia.org/wiki/Data_governance).
-
-Shall we start?
-
+TODO: write an intro
 
 # The Problem
 
