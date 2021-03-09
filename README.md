@@ -2,7 +2,11 @@
 
 Toy data platform for start-up company providing web tracking analytics.
 
-## Technologies used
+## Status
+
+Work in progress.
+
+## Technology stack
 
 * Edge service: [Go](https://golang.org/)
 * Simulation service: [Go](https://golang.org/)
@@ -12,3 +16,5 @@ Toy data platform for start-up company providing web tracking analytics.
   * Target: [Apache Spark](https://spark.apache.org/)
 * OLAP backend: [Apache Druid](https://druid.apache.org/)
 * Dashboards and exploratory: [Redash](https://redash.io/)
+* Core platform management: [Terraform](https://www.terraform.io/)
+* Applications management: [Helm](https://helm.sh/) 
