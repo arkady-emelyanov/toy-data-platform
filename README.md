@@ -1,6 +1,6 @@
 # Toy Data Platform
 
-Toy data platform for start-up company providing web tracking analytics.
+Toy data platform for a company that provides web analytics.
 
 ## Status
 
