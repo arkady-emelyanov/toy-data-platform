@@ -73,4 +73,5 @@ Here is the list of tools/technologies used in the tutorial:
 * [Docker Desktop](https://www.docker.com/products/docker-desktop)
 * [Minikube](https://minikube.sigs.k8s.io/docs/)
 
-As you can see, it's quite big. But don't worry, developer tools installation instructions will be provided later in the tutorial.
+As you can see, it's quite big. Don't worry, developer tools installation instructions will be provided
+[later in the tutorial](./Part-2.md).
