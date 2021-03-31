@@ -34,7 +34,7 @@
         <slf4j.version>1.7.30</slf4j.version>
         <bigquery.version>v2-rev20200719-1.30.10</bigquery.version>
         <google-api-client.version>1.30.10</google-api-client.version>
-        <guava.version>25.1-jre</guava.version>
+        <guava.version>30.0-jre</guava.version>
         <libraries-bom.version>13.2.0</libraries-bom.version>
         <pubsub.version>v1-rev20200713-1.30.10</pubsub.version>
         <nemo.version>0.1</nemo.version>
